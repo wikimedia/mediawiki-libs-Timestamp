@@ -170,7 +170,7 @@ class ConvertibleTimestamp {
 	 * Convert a timestamp string to a given format.
 	 *
 	 * @param int $style Constant Output format for timestamp
-	 * @param string $ts Timestamp
+	 * @param string|int|bool $ts Timestamp
 	 * @return string|bool Formatted timestamp or false on failure
 	 */
 	public static function convert( $style = TS_UNIX, $ts ) {
@@ -189,7 +189,7 @@ class ConvertibleTimestamp {
 	 * @return string
 	 */
 	public static function now( $style = TS_MW ) {
-		return static::convert( $style, time() );
+		return static::convert( $style, false );
 	}
 
 	/**
