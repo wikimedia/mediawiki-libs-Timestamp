@@ -25,14 +25,11 @@ namespace Wikimedia\Timestamp\Test;
 
 use Wikimedia\Timestamp\ConvertibleTimestamp;
 
-/**
- * Tests timestamp parsing and output.
- */
 class ConvertibleTimestampTest extends \PHPUnit_Framework_TestCase {
 	/**
 	 * @covers \Wikimedia\Timestamp\ConvertibleTimestamp::__construct
 	 */
-	public function testConstructWithNoTimestamp() {
+	public function testConstructWithoutTimestamp() {
 		$timestamp = new ConvertibleTimestamp();
 		$this->assertInternalType( 'string', $timestamp->getTimestamp() );
 		$this->assertNotEmpty( $timestamp->getTimestamp() );
@@ -47,7 +44,7 @@ class ConvertibleTimestampTest extends \PHPUnit_Framework_TestCase {
 		$this->assertEquals( '1406833268', $timestamp->__toString() );
 	}
 
-	public static function provideValidTimestampDifferences() {
+	public static function provideDiff() {
 		return [
 			[ '1406833268', '1406833269', '00 00 00 01' ],
 			[ '1406833268', '1406833329', '00 00 01 01' ],
@@ -57,7 +54,7 @@ class ConvertibleTimestampTest extends \PHPUnit_Framework_TestCase {
 	}
 
 	/**
-	 * @dataProvider provideValidTimestampDifferences
+	 * @dataProvider provideDiff
 	 * @covers \Wikimedia\Timestamp\ConvertibleTimestamp::diff
 	 */
 	public function testDiff( $timestamp1, $timestamp2, $expected ) {
@@ -68,7 +65,8 @@ class ConvertibleTimestampTest extends \PHPUnit_Framework_TestCase {
 	}
 
 	/**
-	 * Test parsing of valid timestamps and outputing to MW format.
+	 * Parse valid timestamps and output in MW format.
+	 *
 	 * @dataProvider provideValidTimestamps
 	 * @covers \Wikimedia\Timestamp\ConvertibleTimestamp::getTimestamp
 	 */
@@ -78,22 +76,25 @@ class ConvertibleTimestampTest extends \PHPUnit_Framework_TestCase {
 	}
 
 	/**
-	 * Test outputting valid timestamps to different formats.
-	 * @dataProvider provideValidTimestamps
-	 * @covers \Wikimedia\Timestamp\ConvertibleTimestamp::getTimestamp
-	 */
-	public function testValidOutput( $format, $expected, $original ) {
-		$timestamp = new ConvertibleTimestamp( $original );
-		$this->assertEquals( $expected, (string)$timestamp->getTimestamp( $format ) );
-	}
-
-	/**
-	 * Test an invalid timestamp.
+	 * Parse invalid timestamps.
+	 *
+	 * @dataProvider provideInvalidTimestamps
 	 * @expectedException \Wikimedia\Timestamp\TimestampException
 	 * @covers \Wikimedia\Timestamp\ConvertibleTimestamp
 	 */
-	public function testInvalidParse() {
-		new ConvertibleTimestamp( "This is not a timestamp." );
+	public function testInvalidParse( $input ) {
+		new ConvertibleTimestamp( $input );
+	}
+
+	/**
+	 * Output valid timestamps in different formats.
+	 *
+	 * @dataProvider provideValidTimestamps
+	 * @covers \Wikimedia\Timestamp\ConvertibleTimestamp::getTimestamp
+	 */
+	public function testValidFormats( $format, $expected, $original ) {
+		$timestamp = new ConvertibleTimestamp( $original );
+		$this->assertEquals( $expected, (string)$timestamp->getTimestamp( $format ) );
 	}
 
 	/**
@@ -106,17 +107,20 @@ class ConvertibleTimestampTest extends \PHPUnit_Framework_TestCase {
 
 	/**
 	 * Format an invalid timestamp.
+	 *
+	 * @dataProvider provideInvalidTimestamps
 	 * @covers \Wikimedia\Timestamp\ConvertibleTimestamp::convert
 	 */
-	public function testConvertInvalid() {
-		$this->assertSame( false, ConvertibleTimestamp::convert( 'Not a timestamp', 0 ) );
+	public function testConvertInvalid( $input ) {
+		$this->assertSame( false, ConvertibleTimestamp::convert( $input, 0 ) );
 	}
 
 	/**
-	 * Test an out of range timestamp
+	 * Test an out-of-range timestamp.
+	 *
 	 * @dataProvider provideOutOfRangeTimestamps
-	 * @expectedException \Wikimedia\Timestamp\TimestampException
 	 * @covers \Wikimedia\Timestamp\ConvertibleTimestamp
+	 * @expectedException \Wikimedia\Timestamp\TimestampException
 	 */
 	public function testOutOfRangeTimestamps( $format, $input ) {
 		$timestamp = new ConvertibleTimestamp( $input );
@@ -125,8 +129,8 @@ class ConvertibleTimestampTest extends \PHPUnit_Framework_TestCase {
 
 	/**
 	 * Test requesting an invalid output format.
-	 * @expectedException \Wikimedia\Timestamp\TimestampException
 	 * @covers \Wikimedia\Timestamp\ConvertibleTimestamp::getTimestamp
+	 * @expectedException \Wikimedia\Timestamp\TimestampException
 	 */
 	public function testInvalidOutput() {
 		$timestamp = new ConvertibleTimestamp( '1343761268' );
@@ -152,6 +156,16 @@ class ConvertibleTimestampTest extends \PHPUnit_Framework_TestCase {
 			// Some extremes and weird values
 			[ TS_ISO_8601, '9999-12-31T23:59:59Z', '99991231235959' ],
 			[ TS_UNIX, '-62135596801', '00001231235959' ]
+		];
+	}
+
+	/**
+	 * List of invalid timestamps
+	 */
+	public static function provideInvalidTimestamps() {
+		return [
+			[ 'Not a timestamp' ],
+			[ '1971:01:01 06:19:385' ]
 		];
 	}
 
