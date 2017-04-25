@@ -159,10 +159,6 @@ class ConvertibleTimestamp {
 			throw new TimestampException( __METHOD__ . ': Invalid timestamp format.', $e->getCode(), $e );
 		}
 
-		if ( $final === false ) {
-			throw new TimestampException( __METHOD__ . ': Invalid timestamp format.' );
-		}
-
 		$this->timestamp = $final;
 	}
 
