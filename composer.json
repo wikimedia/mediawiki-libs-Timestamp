@@ -27,6 +27,7 @@
 			"phpunit",
 			"phpcs -p -s"
 		],
+		"cover": "phpunit --coverage-html coverage/",
 		"fix": "phpcbf"
 	}
 }

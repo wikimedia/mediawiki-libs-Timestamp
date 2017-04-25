@@ -9,6 +9,9 @@
 	<filter>
 		<whitelist addUncoveredFilesFromWhitelist="true">
 			<directory suffix=".php">./src</directory>
+			<exclude>
+				<file>./src/defines.php</file>
+			</exclude>
 		</whitelist>
 	</filter>
 </phpunit>

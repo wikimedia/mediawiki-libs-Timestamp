@@ -37,6 +37,16 @@ class ConvertibleTimestampTest extends \PHPUnit_Framework_TestCase {
 	}
 
 	/**
+	 * @covers \Wikimedia\Timestamp\ConvertibleTimestamp::__construct
+	 */
+	public function testConstructWithDateTime() {
+		$input = '1343761268';
+		$dt = new \DateTime( "@$input", new \DateTimeZone( 'GMT' ) );
+		$timestamp = new ConvertibleTimestamp( $dt );
+		$this->assertSame( $input, $timestamp->getTimestamp() );
+	}
+
+	/**
 	 * @covers \Wikimedia\Timestamp\ConvertibleTimestamp::__toString
 	 */
 	public function testToString() {
@@ -68,6 +78,7 @@ class ConvertibleTimestampTest extends \PHPUnit_Framework_TestCase {
 	 * Parse valid timestamps and output in MW format.
 	 *
 	 * @dataProvider provideValidTimestamps
+	 * @covers \Wikimedia\Timestamp\ConvertibleTimestamp::setTimestamp
 	 * @covers \Wikimedia\Timestamp\ConvertibleTimestamp::getTimestamp
 	 */
 	public function testValidParse( $format, $original, $expected ) {
@@ -75,12 +86,56 @@ class ConvertibleTimestampTest extends \PHPUnit_Framework_TestCase {
 		$this->assertEquals( $expected, $timestamp->getTimestamp( TS_MW ) );
 	}
 
+	public static function provideParseOnly() {
+		// Formats supported only by setTimestamp(), but do not
+		// have a constant for getTimestamp()
+		return [
+			'RFC 850' => [ 'Tuesday, 31-Jul-12 19:01:08 UTC', '20120731190108' ],
+			'asctime' => [ 'Tue Jul 31 19:01:08 2012', '20120731190108' ],
+		];
+	}
+
+	/**
+	 * @dataProvider provideParseOnly
+	 * @covers \Wikimedia\Timestamp\ConvertibleTimestamp::setTimestamp
+	 */
+	public function testValidParseOnly( $original, $expected ) {
+		$timestamp = new ConvertibleTimestamp( $original );
+		$this->assertEquals( $expected, $timestamp->getTimestamp( TS_MW ) );
+	}
+
+	/**
+	 * @covers \Wikimedia\Timestamp\ConvertibleTimestamp::setTimestamp
+	 */
+	public function testValidParseZero() {
+		$now = time();
+		$timestamp = new ConvertibleTimestamp( 0 );
+		$this->assertEquals(
+			$now,
+			$timestamp->getTimestamp( TS_UNIX ),
+			'now',
+			10.0 // acceptable delta in seconds
+		);
+	}
+
+	/**
+	 * @covers \Wikimedia\Timestamp\ConvertibleTimestamp::now
+	 */
+	public function testNow() {
+		$this->assertEquals(
+			time(),
+			ConvertibleTimestamp::now( TS_UNIX ),
+			'now',
+			10.0 // acceptable delta in seconds
+		);
+	}
+
 	/**
 	 * Parse invalid timestamps.
 	 *
 	 * @dataProvider provideInvalidTimestamps
 	 * @expectedException \Wikimedia\Timestamp\TimestampException
-	 * @covers \Wikimedia\Timestamp\ConvertibleTimestamp
+	 * @covers \Wikimedia\Timestamp\ConvertibleTimestamp::setTimestamp
 	 */
 	public function testInvalidParse( $input ) {
 		new ConvertibleTimestamp( $input );
@@ -112,7 +167,7 @@ class ConvertibleTimestampTest extends \PHPUnit_Framework_TestCase {
 	 * @covers \Wikimedia\Timestamp\ConvertibleTimestamp::convert
 	 */
 	public function testConvertInvalid( $input ) {
-		$this->assertSame( false, ConvertibleTimestamp::convert( $input, 0 ) );
+		$this->assertSame( false, ConvertibleTimestamp::convert( TS_UNIX, $input ) );
 	}
 
 	/**
@@ -127,14 +182,58 @@ class ConvertibleTimestampTest extends \PHPUnit_Framework_TestCase {
 		$timestamp->getTimestamp( $format );
 	}
 
+	public static function provideInvalidFormats() {
+		return [
+			[ 'Not a format' ],
+			[ 98 ],
+		];
+	}
+
 	/**
-	 * Test requesting an invalid output format.
+	 * @dataProvider provideInvalidFormats
 	 * @covers \Wikimedia\Timestamp\ConvertibleTimestamp::getTimestamp
 	 * @expectedException \Wikimedia\Timestamp\TimestampException
 	 */
-	public function testInvalidOutput() {
+	public function testInvalidFormat( $format ) {
 		$timestamp = new ConvertibleTimestamp( '1343761268' );
-		$timestamp->getTimestamp( 98 );
+		$timestamp->getTimestamp( $format );
+	}
+
+	/**
+	 * @covers \Wikimedia\Timestamp\ConvertibleTimestamp::setTimezone
+	 */
+	public function testSetTimezone() {
+		$timestamp = new ConvertibleTimestamp( 0 );
+		$this->assertSame( null, $timestamp->setTimezone( 'GMT' ) );
+	}
+
+	/**
+	 * @covers \Wikimedia\Timestamp\ConvertibleTimestamp::setTimezone
+	 * @expectedException \Wikimedia\Timestamp\TimestampException
+	 */
+	public function testSetTimezoneInvalid() {
+		$timestamp = new ConvertibleTimestamp( 0 );
+		$timestamp->setTimezone( 'Invalid' );
+	}
+
+	/**
+	 * @covers \Wikimedia\Timestamp\ConvertibleTimestamp::getTimezone
+	 */
+	public function testGetTimezone() {
+		$timestamp = new ConvertibleTimestamp( 0 );
+		$this->assertInstanceOf(
+			\DateTimeZone::class,
+			$timestamp->getTimezone()
+		);
+	}
+
+	/**
+	 * @covers \Wikimedia\Timestamp\ConvertibleTimestamp::format
+	 */
+	public function testFormat() {
+		$timestamp = new ConvertibleTimestamp( '1343761268' );
+		$this->assertSame( '1343761268', $timestamp->format( 'U' ) );
+		$this->assertSame( '20120731190108', $timestamp->format( 'YmdHis' ) );
 	}
 
 	/**
@@ -143,7 +242,7 @@ class ConvertibleTimestampTest extends \PHPUnit_Framework_TestCase {
 	 */
 	public static function provideValidTimestamps() {
 		return [
-			// Various formats
+			// Formats supported in both directions
 			[ TS_UNIX, '1343761268', '20120731190108' ],
 			[ TS_MW, '20120731190108', '20120731190108' ],
 			[ TS_DB, '2012-07-31 19:01:08', '20120731190108' ],
@@ -164,8 +263,13 @@ class ConvertibleTimestampTest extends \PHPUnit_Framework_TestCase {
 	 */
 	public static function provideInvalidTimestamps() {
 		return [
+			// Not matching any known patterns
+			// (throws from main 'else' branch in setTimestamp)
 			[ 'Not a timestamp' ],
-			[ '1971:01:01 06:19:385' ]
+			[ '1971:01:01 06:19:385' ],
+			// Invalid values for known patterns
+			// (throws from DateTime construction)
+			[ 'Zed, 40 Mud 2012 99:99:99 GMT' ],
 		];
 	}
 

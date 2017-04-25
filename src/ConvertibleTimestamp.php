@@ -125,7 +125,7 @@ class ConvertibleTimestamp {
 		) ) {
 			# TS_POSTGRES
 		} elseif ( preg_match(
-		# Day of week
+			# Day of week
 			'/^[ \t\r\n]*([A-Z][a-z]{2},[ \t\r\n]*)?' .
 			# dd Mon yyyy
 			'\d\d?[ \t\r\n]*[A-Z][a-z]{2}[ \t\r\n]*\d{2}(?:\d{2})?' .
@@ -138,7 +138,7 @@ class ConvertibleTimestamp {
 			# The regex is a superset of rfc2822 for readability
 			$strtime = strtok( $ts, ';' );
 		} elseif ( preg_match( '/^[A-Z][a-z]{5,8}, \d\d-[A-Z][a-z]{2}-\d{2} \d\d:\d\d:\d\d/', $ts ) ) {
-			# TS_RFC850
+			# RFC 850
 			$strtime = $ts;
 		} elseif ( preg_match( '/^[A-Z][a-z]{2} [A-Z][a-z]{2} +\d{1,2} \d\d:\d\d:\d\d \d{4}/', $ts ) ) {
 			# asctime
