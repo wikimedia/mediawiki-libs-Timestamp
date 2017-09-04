@@ -10,8 +10,12 @@
 		}
 	],
 	"autoload": {
-		"classmap": ["src/"],
-		"files": ["src/defines.php"]
+		"classmap": [
+			"src/"
+		],
+		"files": [
+			"src/defines.php"
+		]
 	},
 	"require": {
 		"php": ">=5.5.9"
@@ -19,7 +23,7 @@
 	"require-dev": {
 		"jakub-onderka/php-parallel-lint": "0.9.2",
 		"phpunit/phpunit": "4.8.24",
-		"mediawiki/mediawiki-codesniffer": "0.7.2"
+		"mediawiki/mediawiki-codesniffer": "0.12.0"
 	},
 	"scripts": {
 		"test": [
