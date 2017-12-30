@@ -23,7 +23,7 @@
 	"require-dev": {
 		"jakub-onderka/php-parallel-lint": "0.9.2",
 		"phpunit/phpunit": "4.8.24",
-		"mediawiki/mediawiki-codesniffer": "14.1.0"
+		"mediawiki/mediawiki-codesniffer": "15.0.0"
 	},
 	"scripts": {
 		"test": [
@@ -32,6 +32,9 @@
 			"phpcs -p -s"
 		],
 		"cover": "phpunit --coverage-html coverage/",
-		"fix": "phpcbf"
+		"fix": [
+			"phpcbf",
+			"phpcbf"
+		]
 	}
 }
