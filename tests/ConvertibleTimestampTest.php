@@ -25,7 +25,7 @@ namespace Wikimedia\Timestamp\Test;
 
 use Wikimedia\Timestamp\ConvertibleTimestamp;
 
-class ConvertibleTimestampTest extends \PHPUnit_Framework_TestCase {
+class ConvertibleTimestampTest extends \PHPUnit\Framework\TestCase {
 	/**
 	 * @covers \Wikimedia\Timestamp\ConvertibleTimestamp::__construct
 	 */
