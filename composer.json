@@ -22,7 +22,7 @@
 	},
 	"require-dev": {
 		"jakub-onderka/php-parallel-lint": "0.9.2",
-		"phpunit/phpunit": "4.8.24",
+		"phpunit/phpunit": "4.8.36",
 		"mediawiki/mediawiki-codesniffer": "15.0.0"
 	},
 	"scripts": {
