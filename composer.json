@@ -1,7 +1,7 @@
 {
 	"name": "wikimedia/timestamp",
 	"description": "Creation, parsing, and conversion of timestamps",
-	"license": "GPL-2.0+",
+	"license": "GPL-2.0-or-later",
 	"homepage": "https://www.mediawiki.org/wiki/Timestamp",
 	"authors": [
 		{
