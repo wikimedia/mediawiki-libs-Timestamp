@@ -81,9 +81,9 @@ class ConvertibleTimestampTest extends \PHPUnit\Framework\TestCase {
 	 * @covers \Wikimedia\Timestamp\ConvertibleTimestamp::setTimestamp
 	 * @covers \Wikimedia\Timestamp\ConvertibleTimestamp::getTimestamp
 	 */
-	public function testValidParse( $format, $original, $expected ) {
+	public function testValidParse( $originalFormat, $original, $expectedFormat, $expected ) {
 		$timestamp = new ConvertibleTimestamp( $original );
-		$this->assertEquals( $expected, $timestamp->getTimestamp( TS_MW ) );
+		$this->assertEquals( $expected, $timestamp->getTimestamp( $expectedFormat ) );
 	}
 
 	public static function provideParseOnly() {
@@ -147,17 +147,17 @@ class ConvertibleTimestampTest extends \PHPUnit\Framework\TestCase {
 	 * @dataProvider provideValidTimestamps
 	 * @covers \Wikimedia\Timestamp\ConvertibleTimestamp::getTimestamp
 	 */
-	public function testValidFormats( $format, $expected, $original ) {
+	public function testValidFormats( $expectedFormat, $expected, $originalFormat, $original ) {
 		$timestamp = new ConvertibleTimestamp( $original );
-		$this->assertEquals( $expected, (string)$timestamp->getTimestamp( $format ) );
+		$this->assertEquals( $expected, (string)$timestamp->getTimestamp( $expectedFormat ) );
 	}
 
 	/**
 	 * @dataProvider provideValidTimestamps
 	 * @covers \Wikimedia\Timestamp\ConvertibleTimestamp::convert
 	 */
-	public function testConvert( $format, $expected, $original ) {
-		$this->assertSame( $expected, ConvertibleTimestamp::convert( $format, $original ) );
+	public function testConvert( $expectedFormat, $expected, $originalFormat, $original ) {
+		$this->assertSame( $expected, ConvertibleTimestamp::convert( $expectedFormat, $original ) );
 	}
 
 	/**
@@ -243,18 +243,21 @@ class ConvertibleTimestampTest extends \PHPUnit\Framework\TestCase {
 	public static function provideValidTimestamps() {
 		return [
 			// Formats supported in both directions
-			[ TS_UNIX, '1343761268', '20120731190108' ],
-			[ TS_MW, '20120731190108', '20120731190108' ],
-			[ TS_DB, '2012-07-31 19:01:08', '20120731190108' ],
-			[ TS_ISO_8601, '2012-07-31T19:01:08Z', '20120731190108' ],
-			[ TS_ISO_8601_BASIC, '20120731T190108Z', '20120731190108' ],
-			[ TS_EXIF, '2012:07:31 19:01:08', '20120731190108' ],
-			[ TS_RFC2822, 'Tue, 31 Jul 2012 19:01:08 GMT', '20120731190108' ],
-			[ TS_ORACLE, '31-07-2012 19:01:08.000000', '20120731190108' ],
-			[ TS_POSTGRES, '2012-07-31 19:01:08 GMT', '20120731190108' ],
+			[ TS_UNIX, '1343761268', TS_MW, '20120731190108' ],
+			[ TS_UNIX_MICRO, '1343761268.000000', TS_MW, '20120731190108' ],
+			[ TS_UNIX_MICRO, '1343761268.123456', TS_ORACLE, '31-07-2012 19:01:08.123456' ],
+			[ TS_MW, '20120731190108', TS_MW, '20120731190108' ],
+			[ TS_DB, '2012-07-31 19:01:08', TS_MW, '20120731190108' ],
+			[ TS_ISO_8601, '2012-07-31T19:01:08Z', TS_MW, '20120731190108' ],
+			[ TS_ISO_8601_BASIC, '20120731T190108Z', TS_MW, '20120731190108' ],
+			[ TS_EXIF, '2012:07:31 19:01:08', TS_MW, '20120731190108' ],
+			[ TS_RFC2822, 'Tue, 31 Jul 2012 19:01:08 GMT', TS_MW, '20120731190108' ],
+			[ TS_ORACLE, '31-07-2012 19:01:08.000000', TS_MW, '20120731190108' ],
+			[ TS_ORACLE, '31-07-2012 19:01:08.123456', TS_UNIX_MICRO, '1343761268.123456' ],
+			[ TS_POSTGRES, '2012-07-31 19:01:08 GMT', TS_MW, '20120731190108' ],
 			// Some extremes and weird values
-			[ TS_ISO_8601, '9999-12-31T23:59:59Z', '99991231235959' ],
-			[ TS_UNIX, '-62135596801', '00001231235959' ]
+			[ TS_ISO_8601, '9999-12-31T23:59:59Z', TS_MW, '99991231235959' ],
+			[ TS_UNIX, '-62135596801', TS_MW, '00001231235959' ]
 		];
 	}
 
