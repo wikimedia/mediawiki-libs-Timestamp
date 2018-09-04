@@ -23,6 +23,7 @@
 
 namespace Wikimedia\Timestamp\Test;
 
+use Closure;
 use Wikimedia\Timestamp\ConvertibleTimestamp;
 
 class ConvertibleTimestampTest extends \PHPUnit\Framework\TestCase {
@@ -234,6 +235,36 @@ class ConvertibleTimestampTest extends \PHPUnit\Framework\TestCase {
 		$timestamp = new ConvertibleTimestamp( '1343761268' );
 		$this->assertSame( '1343761268', $timestamp->format( 'U' ) );
 		$this->assertSame( '20120731190108', $timestamp->format( 'YmdHis' ) );
+	}
+
+	/**
+	 * @covers \Wikimedia\Timestamp\ConvertibleTimestamp::setFakeTime
+	 * @covers \Wikimedia\Timestamp\ConvertibleTimestamp::time
+	 */
+	public function testFakeTime() {
+		// fake clock ticks up
+		$fakeTime = ConvertibleTimestamp::convert( TS_UNIX, '20010101000000' );
+		ConvertibleTimestamp::setFakeTime( function () use ( &$fakeTime ) {
+			return $fakeTime++;
+		} );
+		$this->assertSame( '20010101000000', ConvertibleTimestamp::now() );
+		$this->assertSame( '20010101000001', ConvertibleTimestamp::convert( TS_MW, false ) );
+		$this->assertSame( '20010101000002', ConvertibleTimestamp::now() );
+
+		// fake time stays put
+		$old = ConvertibleTimestamp::setFakeTime( '20200202112233' );
+		$this->assertTrue( is_callable( $old ) );
+
+		$this->assertSame( '20200202112233', ConvertibleTimestamp::now() );
+		$this->assertSame( '20200202112233', ConvertibleTimestamp::convert( TS_MW, false ) );
+		$this->assertSame( '20200202112233', ConvertibleTimestamp::now() );
+
+		// no more fake time
+		$old = ConvertibleTimestamp::setFakeTime( false );
+		$this->assertInstanceOf( Closure::class, $old );
+		$this->assertSame( '20200202112233', ConvertibleTimestamp::convert( TS_MW, $old() ) );
+
+		$this->assertNotSame( '20200202112233', ConvertibleTimestamp::now() );
 	}
 
 	/**
