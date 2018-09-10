@@ -93,6 +93,7 @@ class ConvertibleTimestampTest extends \PHPUnit\Framework\TestCase {
 		return [
 			'RFC 850' => [ 'Tuesday, 31-Jul-12 19:01:08 UTC', '20120731190108' ],
 			'asctime' => [ 'Tue Jul 31 19:01:08 2012', '20120731190108' ],
+			'old TS_POSTGRES' => [ '2012-07-31 19:01:08 GMT', '20120731190108' ],
 		];
 	}
 
@@ -285,7 +286,7 @@ class ConvertibleTimestampTest extends \PHPUnit\Framework\TestCase {
 			[ TS_RFC2822, 'Tue, 31 Jul 2012 19:01:08 GMT', TS_MW, '20120731190108' ],
 			[ TS_ORACLE, '31-07-2012 19:01:08.000000', TS_MW, '20120731190108' ],
 			[ TS_ORACLE, '31-07-2012 19:01:08.123456', TS_UNIX_MICRO, '1343761268.123456' ],
-			[ TS_POSTGRES, '2012-07-31 19:01:08 GMT', TS_MW, '20120731190108' ],
+			[ TS_POSTGRES, '2012-07-31 19:01:08+00', TS_MW, '20120731190108' ],
 			// Some extremes and weird values
 			[ TS_ISO_8601, '9999-12-31T23:59:59Z', TS_MW, '99991231235959' ],
 			[ TS_UNIX, '-62135596801', TS_MW, '00001231235959' ]
