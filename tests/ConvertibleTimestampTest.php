@@ -244,18 +244,23 @@ class ConvertibleTimestampTest extends \PHPUnit\Framework\TestCase {
 	 */
 	public function testFakeTime() {
 		// fake clock ticks up
-		$fakeTime = ConvertibleTimestamp::convert( TS_UNIX, '20010101000000' );
-		ConvertibleTimestamp::setFakeTime( function () use ( &$fakeTime ) {
-			return $fakeTime++;
+		$fakeTime = (int)ConvertibleTimestamp::convert( TS_UNIX, '20010101000000' );
+		$fakeClock = $fakeTime;
+		ConvertibleTimestamp::setFakeTime( function () use ( &$fakeClock ) {
+			return $fakeClock++;
 		} );
-		$this->assertSame( '20010101000000', ConvertibleTimestamp::now() );
-		$this->assertSame( '20010101000001', ConvertibleTimestamp::convert( TS_MW, false ) );
-		$this->assertSame( '20010101000002', ConvertibleTimestamp::now() );
+		$this->assertSame( $fakeTime, ConvertibleTimestamp::time() );
+		$this->assertSame( '20010101000001', ConvertibleTimestamp::now() );
+		$this->assertSame( '20010101000002', ConvertibleTimestamp::convert( TS_MW, false ) );
+		$this->assertSame( '20010101000003', ConvertibleTimestamp::now() );
+		$this->assertSame( $fakeTime + 4, ConvertibleTimestamp::time() );
 
 		// fake time stays put
 		$old = ConvertibleTimestamp::setFakeTime( '20200202112233' );
 		$this->assertTrue( is_callable( $old ) );
 
+		$fakeTime = (int)ConvertibleTimestamp::convert( TS_UNIX, '20200202112233' );
+		$this->assertSame( $fakeTime, ConvertibleTimestamp::time() );
 		$this->assertSame( '20200202112233', ConvertibleTimestamp::now() );
 		$this->assertSame( '20200202112233', ConvertibleTimestamp::convert( TS_MW, false ) );
 		$this->assertSame( '20200202112233', ConvertibleTimestamp::now() );
@@ -266,6 +271,7 @@ class ConvertibleTimestampTest extends \PHPUnit\Framework\TestCase {
 		$this->assertSame( '20200202112233', ConvertibleTimestamp::convert( TS_MW, $old() ) );
 
 		$this->assertNotSame( '20200202112233', ConvertibleTimestamp::now() );
+		$this->assertNotSame( $fakeTime, ConvertibleTimestamp::time() );
 	}
 
 	/**
