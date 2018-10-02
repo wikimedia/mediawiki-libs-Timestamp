@@ -71,8 +71,9 @@ class ConvertibleTimestamp {
 	/**
 	 * Set a fake time value or clock callback.
 	 *
-	 * @param callable|string|false $fakeTime a fixed time string, or a callback() returning an int
-	 *        representing a UNIX epoch, or false to disable fake time and go back to real time.
+	 * @param callable|string|int|false $fakeTime a fixed time string, or an integer Unix time, or
+	 *   a callback() returning an int representing a UNIX epoch, or false to disable fake time and
+	 *   go back to real time.
 	 *
 	 * @return callable|null the previous fake time callback, if any.
 	 */
