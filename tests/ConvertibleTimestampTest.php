@@ -53,6 +53,9 @@ class ConvertibleTimestampTest extends \PHPUnit\Framework\TestCase {
 	public function testToString() {
 		$timestamp = new ConvertibleTimestamp( '1406833268' ); // Equivalent to 20140731190108
 		$this->assertEquals( '1406833268', $timestamp->__toString() );
+
+		$timestamp = new ConvertibleTimestamp( '20140731190108' );
+		$this->assertEquals( '1406833268', $timestamp->__toString() );
 	}
 
 	public static function provideDiff() {
@@ -88,12 +91,80 @@ class ConvertibleTimestampTest extends \PHPUnit\Framework\TestCase {
 	}
 
 	public static function provideParseOnly() {
-		// Formats supported only by setTimestamp(), but do not
-		// have a constant for getTimestamp()
+		$s = " \r\n \t\t\n \r ";
 		return [
-			'RFC 850' => [ 'Tuesday, 31-Jul-12 19:01:08 UTC', '20120731190108' ],
-			'asctime' => [ 'Tue Jul 31 19:01:08 2012', '20120731190108' ],
-			'old TS_POSTGRES' => [ '2012-07-31 19:01:08 GMT', '20120731190108' ],
+			// Systematically testing regexes
+			'TS_DB' => [ '2012-07-31 19:01:08', '1343761268.000000' ],
+			'TS_MW' => [ '20120731190108', '1343761268.000000' ],
+			'TS_ISO_8601' => [ '2012-07-31T19:01:08Z', '1343761268.000000' ],
+			'TS_ISO_8601, no Z' => [ '2012-07-31T19:01:08', '1343761268.000000' ],
+			'TS_ISO_8601, milliseconds' => [ '2012-07-31T19:01:08.123Z', '1343761268.123000' ],
+			'TS_ISO_8601, microseconds, no Z' => [ '2012-07-31T19:01:08.123456', '1343761268.123456' ],
+			'TS_ISO_8601_BASIC' => [ '20120731T190108Z', '1343761268.000000' ],
+			'TS_ISO_8601_BASIC, no Z' => [ '20120731T190108', '1343761268.000000' ],
+			'TS_ISO_8601_BASIC, milliseconds' => [ '20120731T190108.123Z', '1343761268.123000' ],
+			'TS_ISO_8601_BASIC, microseconds, no Z' => [ '20120731T190108.123456', '1343761268.123456' ],
+			'TS_UNIX' => [ '1343761268', '1343761268.000000' ],
+			'TS_UNIX, negative' => [ '-1343761268', '-1343761268.000000' ],
+			'TS_UNIX_MICRO' => [ '1343761268.123456', '1343761268.123456' ],
+			'TS_UNIX_MICRO, lower precision' => [ '1343761268.123', '1343761268.123000' ],
+			'TS_UNIX_MICRO, negative' => [ '-1343761268.123456', '-1343761268.123456' ],
+			'TS_UNIX_MICRO, negative, low precision' => [ '-1343761268.123', '-1343761268.123000' ],
+			'TS_UNIX_MICRO, near-zero microseconds' => [ '1343761268.000006', '1343761268.000006' ],
+			'TS_ORACLE' => [ '31-07-2012 19:01:08.123456', '1343761268.123456' ],
+			'TS_POSTGRES' => [ '2012-07-31 19:01:08+00', '1343761268.000000' ],
+			'TS_POSTGRES, milliseconds' => [ '2012-07-31 19:01:08.123+00', '1343761268.123000' ],
+			'TS_POSTGRES, microseconds' => [ '2012-07-31 19:01:08.123456+00', '1343761268.123456' ],
+			'TS_POSTGRES, timezone +02' => [ '2012-07-31 21:01:08+02', '1343761268.000000' ],
+			'TS_POSTGRES, timezone -02' => [ '2012-07-31 17:01:08-02', '1343761268.000000' ],
+			'TS_POSTGRES, timezone  02' => [ '2012-07-31 21:01:08 02', '1343761268.000000' ],
+			'old TS_POSTGRES' => [ '2012-07-31 19:01:08 GMT', '1343761268.000000' ],
+			'old TS_POSTGRES, milliseconds' => [ '2012-07-31 19:01:08.123 GMT', '1343761268.123000' ],
+			'old TS_POSTGRES, microseconds' => [ '2012-07-31 19:01:08.123456 GMT', '1343761268.123456' ],
+			'TS_EXIF' => [ '2012-07-31 19:01:08', '1343761268.000000' ],
+			'TS_RFC2822' => [ 'Tue, 31 Jul 2012 19:01:08 GMT', '1343761268.000000' ],
+			'TS_RFC2822, odd spacing' => [
+				"{$s}Tue,{$s}31{$s}Jul{$s}2012{$s}19{$s}:{$s}01{$s}:{$s}08{$s}GMT", '1343761268.000000'
+			],
+			'TS_RFC2822, minimal spacing' => [ 'Tue,31 Jul 2012 19:01:08 GMT', '1343761268.000000' ],
+			'TS_RFC2822, no weekday' => [ '31 Jul 2012 19:01:08 GMT', '1343761268.000000' ],
+			'TS_RFC2822, single-digit day' => [ 'Tue, 1 Jul 2012 19:01:08 GMT', '1341342068.000000' ],
+			'TS_RFC2822, year "12" => 2012' => [ 'Tue, 31 Jul 12 19:01:08 GMT', '1343761268.000000' ],
+			'TS_RFC2822, year "50" => 1950' => [ 'Tue, 31 Jul 50 19:01:08 GMT', '-612766732.000000' ],
+			'TS_RFC2822, year "112" => 2012' => [ 'Tue, 31 Jul 112 19:01:08 GMT', '1343761268.000000' ],
+			'TS_RFC2822, missing timezone' => [ 'Tue, 31 Jul 2012 19:01:08', '1343761268.000000' ],
+			'TS_RFC2822, timezone UT' => [ 'Tue, 31 Jul 2012 19:01:08 UT', '1343761268.000000' ],
+			'TS_RFC2822, timezone +0200' => [ 'Tue, 31 Jul 2012 21:01:08 +0200', '1343761268.000000' ],
+			'TS_RFC2822, timezone -0200' => [ 'Tue, 31 Jul 2012 17:01:08 -0200', '1343761268.000000' ],
+			'TS_RFC2822, timezone EDT' => [ 'Tue, 31 Jul 2012 15:01:08 EDT', '1343761268.000000' ],
+			'TS_RFC2822, timezone A (ignored)' => [ 'Tue, 31 Jul 2012 19:01:08 A', '1343761268.000000' ],
+			'TS_RFC2822, timezone n (ignored)' => [ 'Tue, 31 Jul 2012 19:01:08 n', '1343761268.000000' ],
+			'TS_RFC2822, trailing comment' => [
+				'Tue, 31 Jul 2012 19:01:08 GMT; a comment', '1343761268.000000'
+			],
+			'TS_RFC2822, trailing comment with space' => [
+				"Tue, 31 Jul 2012 19:01:08 GMT{$s}; a comment", '1343761268.000000'
+			],
+			'TS_RFC850' => [ 'Tuesday, 31-Jul-12 19:01:08 UTC', '1343761268.000000' ],
+			'TS_RFC850, no timezone' => [ 'Tuesday, 31-Jul-12 19:01:08', '1343761268.000000' ],
+			'TS_RFC850, timezone +02' => [ 'Tuesday, 31-Jul-12 21:01:08 +02', '1343761268.000000' ],
+			'TS_RFC850, timezone +0200' => [ 'Tuesday, 31-Jul-12 21:01:08 +0200', '1343761268.000000' ],
+			'TS_RFC850, timezone +02:00' => [ 'Tuesday, 31-Jul-12 21:01:08 +02:00', '1343761268.000000' ],
+			'TS_RFC850, timezone -02' => [ 'Tuesday, 31-Jul-12 17:01:08 -02', '1343761268.000000' ],
+			'TS_RFC850, timezone -0200' => [ 'Tuesday, 31-Jul-12 17:01:08 -0200', '1343761268.000000' ],
+			'TS_RFC850, timezone -02:00' => [ 'Tuesday, 31-Jul-12 17:01:08 -02:00', '1343761268.000000' ],
+			'TS_RFC850, timezone EDT' => [ 'Tuesday, 31-Jul-12 15:01:08 EDT', '1343761268.000000' ],
+			'TS_RFC850, timezone X' => [ 'Tuesday, 31-Jul-12 08:01:08 X', '1343761268.000000' ],
+			'TS_RFC850, timezone CEST' => [ 'Tuesday, 31-Jul-12 21:01:08 CEST', '1343761268.000000' ],
+			'asctime' => [ 'Tue Jul 31 19:01:08 2012', '1343761268.000000' ],
+			'asctime, one-digit day' => [ 'Tue Jul  1 19:01:08 2012', '1341342068.000000' ],
+			'asctime, one-digit day without space' => [ 'Tue Jul 1 19:01:08 2012', '1341342068.000000' ],
+			'asctime, with newline' => [ "Tue Jul 31 19:01:08 2012\n", '1343761268.000000' ],
+
+			// Testing timezone handling
+			'TS_POSTGRES w/zone => TS_MW' => [ '2012-07-31 21:01:08+02', '20120731190108', TS_MW ],
+			'TS_RFC2822 w/zone => TS_MW' => [ 'Tue, 31 Jul 2012 15:01:08 EDT', '20120731190108', TS_MW ],
+			'TS_RFC850 w/zone => TS_MW' => [ 'Tuesday, 31-Jul-12 17:01:08 -02:00', '20120731190108', TS_MW ],
 		];
 	}
 
@@ -101,9 +172,9 @@ class ConvertibleTimestampTest extends \PHPUnit\Framework\TestCase {
 	 * @dataProvider provideParseOnly
 	 * @covers \Wikimedia\Timestamp\ConvertibleTimestamp::setTimestamp
 	 */
-	public function testValidParseOnly( $original, $expected ) {
+	public function testValidParseOnly( $original, $expected, $format = TS_UNIX_MICRO ) {
 		$timestamp = new ConvertibleTimestamp( $original );
-		$this->assertEquals( $expected, $timestamp->getTimestamp( TS_MW ) );
+		$this->assertEquals( $expected, $timestamp->getTimestamp( $format ) );
 	}
 
 	/**
@@ -188,6 +259,7 @@ class ConvertibleTimestampTest extends \PHPUnit\Framework\TestCase {
 		return [
 			[ 'Not a format' ],
 			[ 98 ],
+			'TS_UNIX_MICRO, excess precision' => [ '1343761268.123456789' ],
 		];
 	}
 
@@ -205,8 +277,15 @@ class ConvertibleTimestampTest extends \PHPUnit\Framework\TestCase {
 	 * @covers \Wikimedia\Timestamp\ConvertibleTimestamp::setTimezone
 	 */
 	public function testSetTimezone() {
-		$timestamp = new ConvertibleTimestamp( 0 );
-		$this->assertSame( null, $timestamp->setTimezone( 'GMT' ) );
+		$timestamp = new ConvertibleTimestamp( '2012-07-31 19:01:08' );
+		$this->assertSame( '2012-07-31 19:01:08+0000', $timestamp->format( 'Y-m-d H:i:sO' ) );
+		$timestamp->setTimezone( 'America/New_York' );
+		$this->assertSame( '2012-07-31 15:01:08-0400', $timestamp->format( 'Y-m-d H:i:sO' ) );
+
+		$timestamp = new ConvertibleTimestamp( 'Tue, 31 Jul 2012 15:01:08 EDT' );
+		$this->assertSame( '2012-07-31 15:01:08-0400', $timestamp->format( 'Y-m-d H:i:sO' ) );
+		$timestamp->setTimezone( 'UTC' );
+		$this->assertSame( '2012-07-31 19:01:08+0000', $timestamp->format( 'Y-m-d H:i:sO' ) );
 	}
 
 	/**
@@ -295,7 +374,8 @@ class ConvertibleTimestampTest extends \PHPUnit\Framework\TestCase {
 			[ TS_POSTGRES, '2012-07-31 19:01:08+00', TS_MW, '20120731190108' ],
 			// Some extremes and weird values
 			[ TS_ISO_8601, '9999-12-31T23:59:59Z', TS_MW, '99991231235959' ],
-			[ TS_UNIX, '-62135596801', TS_MW, '00001231235959' ]
+			[ TS_UNIX, '-62135596801', TS_MW, '00001231235959' ],
+			[ TS_UNIX_MICRO, '-1.100000', TS_ORACLE, '31-12-1969 23:59:58.900000' ],
 		];
 	}
 
@@ -311,6 +391,29 @@ class ConvertibleTimestampTest extends \PHPUnit\Framework\TestCase {
 			// Invalid values for known patterns
 			// (throws from DateTime construction)
 			[ 'Zed, 40 Mud 2012 99:99:99 GMT' ],
+			// Odd cases formerly accepted
+			[ '2019-05-22T12:00:00.....1257' ],
+			[ '2019-05-22T12:00:001257' ],
+			[ '2019-05-22T12:00:00.....' ],
+			[ '20190522T120000.....1257' ],
+			[ '20190522T1200001257' ],
+			[ '20190522T120000.....' ],
+			[ '2019-05-22 12:00:00....1257-04' ],
+			[ '2019-05-22 12:00:001257-04' ],
+			[ '2019-05-22 12:00:00...-04' ],
+			[ '2019-05-22 12:00:00....1257 GMT' ],
+			[ '2019-05-22 12:00:001257 GMT' ],
+			[ '2019-05-22 12:00:00... GMT' ],
+			[ 'Wed, 22 May 2019 12:00:00 A potato' ],
+			[ 'Wed, 22 May 2019 12:00:00 + 2 days' ],
+			[ 'Wed, 22 May 2019 12:00:00 Monday' ],
+			[ 'Wednesday, 22-May-19 12:00:00 A potato' ],
+			[ 'Wednesday, 22-May-19 12:00:00 + 2 days' ],
+			[ 'Wednesday, 22-May-19 12:00:00 Monday' ],
+			[ 'Wed May 22 12:00:00 2019 A potato' ],
+			[ 'Wed May 22 12:00:00 2019 + 2 days' ],
+			[ 'Wed May 22 12:00:00 2019 Monday' ],
+			[ 'Tue Jul 31 19:01:08 2012 UTC' ],
 		];
 	}
 
