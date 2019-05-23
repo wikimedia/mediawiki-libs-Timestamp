@@ -55,10 +55,10 @@ class ConvertibleTimestamp {
 	 * DateTime::createFromFormat(). Unnamed groups are ignored.
 	 */
 	private static $regexes = [
-		'TS_DB' => '/^(?<Y>\d{4})\-(?<m>\d\d)\-(?<d>\d\d) (?<H>\d\d):(?<i>\d\d):(?<s>\d\d)$/D',
+		// 'TS_DB' => subset of TS_ISO_8601 (with no 'T')
 		'TS_MW' => '/^(?<Y>\d{4})(?<m>\d\d)(?<d>\d\d)(?<H>\d\d)(?<i>\d\d)(?<s>\d\d)$/D',
 		'TS_ISO_8601' =>
-			'/^(?<Y>\d{4})-(?<m>\d{2})-(?<d>\d{2})T' .
+			'/^(?<Y>\d{4})-(?<m>\d{2})-(?<d>\d{2})[T ]' .
 				'(?<H>\d{2}):(?<i>\d{2}):(?<s>\d{2})(?:[.,](?<u>\d{1,6}))?' .
 				'(?<O>Z|[+\-]\d{2}(?::?\d{2})?)?$/',
 		'TS_ISO_8601_BASIC' =>
@@ -68,6 +68,8 @@ class ConvertibleTimestamp {
 		'TS_UNIX_MICRO' => '/^(?<U>-?\d{1,13})\.(?<u>\d{1,6})$/D',
 		'TS_ORACLE' =>
 			'/^(?<d>\d{2})-(?<m>\d{2})-(?<Y>\d{4}) (?<H>\d{2}):(?<i>\d{2}):(?<s>\d{2})\.(?<u>\d{6})$/',
+		// TS_POSTGRES is almost redundant to TS_ISO_8601 (with no 'T'), but accepts a space in place of
+		// a `+` before the timezone.
 		'TS_POSTGRES' =>
 			'/^(?<Y>\d{4})-(?<m>\d\d)-(?<d>\d\d) (?<H>\d\d):(?<i>\d\d):(?<s>\d\d)(?:\.(?<u>\d{1,6}))?' .
 				'(?<O>[\+\- ]\d\d)$/',
