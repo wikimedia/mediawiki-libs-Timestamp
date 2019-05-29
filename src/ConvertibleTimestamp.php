@@ -262,13 +262,15 @@ class ConvertibleTimestamp {
 	}
 
 	/**
-	 * Convert a timestamp string to a given format.
+	 * Converts any timestamp to the given string format.
+	 * This is identical to `( new ConvertibleTimestamp() )->getTimestamp()`,
+	 * except it returns false instead of throwing an exception.
 	 *
 	 * @param int $style Constant Output format for timestamp
-	 * @param string|int|float|bool $ts Timestamp
-	 * @return string|bool Formatted timestamp or false on failure
+	 * @param string|int|float|bool|DateTime $ts Timestamp
+	 * @return string|false Formatted timestamp or false on failure
 	 */
-	public static function convert( $style = TS_UNIX, $ts ) {
+	public static function convert( $style, $ts ) {
 		try {
 			$ct = new static( $ts );
 			return $ct->getTimestamp( $style );
