@@ -189,6 +189,18 @@ class ConvertibleTimestamp {
 					continue;
 				}
 
+				// Apply RFC 2626 § 11.2 rules for fixing a 2-digit year.
+				// For sanity we apply by year as written, without regard for
+				// offset within the year or timezone of the input date.
+				if ( isset( $m['y'] ) ) {
+					$pivot = gmdate( 'Y', static::time() ) + 50;
+					$m['Y'] = $pivot - ( $pivot % 100 ) + $m['y'];
+					if ( $m['Y'] > $pivot ) {
+						$m['Y'] -= 100;
+					}
+					unset( $m['y'] );
+				}
+
 				// TS_POSTGRES's match for 'O' can begin with a space, which PHP doesn't accept
 				if ( $name === 'TS_POSTGRES' && isset( $m['O'] ) && $m['O'][0] === ' ' ) {
 					$m['O'][0] = '+';

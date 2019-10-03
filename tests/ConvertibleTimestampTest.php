@@ -27,6 +27,12 @@ use Closure;
 use Wikimedia\Timestamp\ConvertibleTimestamp;
 
 class ConvertibleTimestampTest extends \PHPUnit\Framework\TestCase {
+
+	protected function tearDown() {
+		parent::tearDown();
+		ConvertibleTimestamp::setFakeTime( null );
+	}
+
 	/**
 	 * @covers \Wikimedia\Timestamp\ConvertibleTimestamp::__construct
 	 */
@@ -187,8 +193,74 @@ class ConvertibleTimestampTest extends \PHPUnit\Framework\TestCase {
 	 * @covers \Wikimedia\Timestamp\ConvertibleTimestamp::setTimestamp
 	 */
 	public function testValidParseOnly( $original, $expected, $format = TS_UNIX_MICRO ) {
+		// Parsing of the 2-digit year in RFC 850 format is tested more extensively below.
+		// For this test, just make sure it doesn't break in 2062.
+		ConvertibleTimestamp::setFakeTime( function () {
+			return 1570123766;
+		} );
+
 		$timestamp = new ConvertibleTimestamp( $original );
 		$this->assertEquals( $expected, $timestamp->getTimestamp( $format ) );
+	}
+
+	public static function provide2DigitYearHandling() {
+		return [
+			'00 in 2019' => [ '2019', '00', '2000' ],
+			'69 in 2019' => [ '2019', '69', '2069' ],
+			'70 in 2019' => [ '2019', '70', '1970' ],
+			'70 in 2020' => [ '2020', '70', '2070' ],
+			'71 in 2020' => [ '2020', '71', '1971' ],
+
+			'19 in 2069' => [ '2069', '19', '2119' ],
+			'20 in 2069' => [ '2069', '20', '2020' ],
+			'20 in 2070' => [ '2070', '20', '2120' ],
+			'21 in 2070' => [ '2070', '21', '2021' ],
+
+			'12 in 1820' => [ '1820', '12', '1812' ],
+			'12 in 1890' => [ '1890', '12', '1912' ],
+			'12 in 2320' => [ '2320', '12', '2312' ],
+			'12 in 2390' => [ '2390', '12', '2412' ],
+		];
+	}
+
+	/**
+	 * @dataProvider provide2DigitYearHandling
+	 * @covers \Wikimedia\Timestamp\ConvertibleTimestamp::setTimestamp
+	 */
+	public function test2DigitYearHandling( $thisYear, $inYear, $outYear ) {
+		$tz = new \DateTimeZone( 'UTC' );
+
+		// We test with an "now" at the beginning and end of the year
+		$nowTimes = [ "$thisYear-01-01 00:00:00", "$thisYear-12-31 23:59:59" ];
+
+		// Test a timestamp in the middle of the year, plus for sanity checking
+		// a timestamp that's actually in the adjacent UTC-years.
+		// We need to get the day-of-week right, or else PHP adjusts the date to make it match.
+		$timestamps = [];
+		$day = \DateTime::createFromFormat( 'Y-m-d', "$outYear-07-31", $tz )->format( 'l' );
+		$timestamps[] = [ "$day, 31-Jul-$inYear 00:00:00 +00", $outYear ];
+		$day = \DateTime::createFromFormat( 'Y-m-d', "$outYear-12-31", $tz )->format( 'l' );
+		$timestamps[] = [ "$day, 31-Dec-$inYear 23:59:59 -01", $outYear + 1 ];
+		$day = \DateTime::createFromFormat( 'Y-m-d', "$outYear-01-01", $tz )->format( 'l' );
+		$timestamps[] = [ "$day, 01-Jan-$inYear 00:00:00 +01", $outYear - 1 ];
+
+		foreach ( $nowTimes as $nowTime ) {
+			$now = \DateTime::createFromFormat( 'Y-m-d H:i:s', $nowTime, $tz )->getTimestamp();
+			$this->assertSame( $nowTime, gmdate( 'Y-m-d H:i:s', $now ), 'sanity check' );
+			ConvertibleTimestamp::setFakeTime( function () use ( $now ) {
+				return $now;
+			} );
+
+			foreach ( $timestamps as list( $ts, $expectYear ) ) {
+				$timestamp = new ConvertibleTimestamp( $ts );
+				$timestamp->setTimezone( 'UTC' );
+				$this->assertEquals(
+					$expectYear,
+					$timestamp->format( 'Y' ),
+					"$ts at $nowTime UTC"
+				);
+			}
+		}
 	}
 
 	/**
