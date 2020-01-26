@@ -38,7 +38,7 @@ class ConvertibleTimestampTest extends \PHPUnit\Framework\TestCase {
 	 */
 	public function testConstructWithoutTimestamp() {
 		$timestamp = new ConvertibleTimestamp();
-		$this->assertInternalType( 'string', $timestamp->getTimestamp() );
+		$this->assertIsString( $timestamp->getTimestamp() );
 		$this->assertNotEmpty( $timestamp->getTimestamp() );
 		$this->assertNotEquals( false, strtotime( $timestamp->getTimestamp( TS_MW ) ) );
 	}
@@ -58,10 +58,10 @@ class ConvertibleTimestampTest extends \PHPUnit\Framework\TestCase {
 	 */
 	public function testToString() {
 		$timestamp = new ConvertibleTimestamp( '1406833268' ); // Equivalent to 20140731190108
-		$this->assertEquals( '1406833268', $timestamp->__toString() );
+		$this->assertSame( '1406833268', $timestamp->__toString() );
 
 		$timestamp = new ConvertibleTimestamp( '20140731190108' );
-		$this->assertEquals( '1406833268', $timestamp->__toString() );
+		$this->assertSame( '1406833268', $timestamp->__toString() );
 	}
 
 	public static function provideDiff() {
