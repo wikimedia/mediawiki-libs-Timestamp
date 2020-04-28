@@ -293,10 +293,10 @@ class ConvertibleTimestampTest extends \PHPUnit\Framework\TestCase {
 	 * Parse invalid timestamps.
 	 *
 	 * @dataProvider provideInvalidTimestamps
-	 * @expectedException \Wikimedia\Timestamp\TimestampException
 	 * @covers \Wikimedia\Timestamp\ConvertibleTimestamp::setTimestamp
 	 */
 	public function testInvalidParse( $input ) {
+		$this->expectException( \Wikimedia\Timestamp\TimestampException::class );
 		new ConvertibleTimestamp( $input );
 	}
 
@@ -334,10 +334,10 @@ class ConvertibleTimestampTest extends \PHPUnit\Framework\TestCase {
 	 *
 	 * @dataProvider provideOutOfRangeTimestamps
 	 * @covers \Wikimedia\Timestamp\ConvertibleTimestamp
-	 * @expectedException \Wikimedia\Timestamp\TimestampException
 	 */
 	public function testOutOfRangeTimestamps( $format, $input ) {
 		$timestamp = new ConvertibleTimestamp( $input );
+		$this->expectException( \Wikimedia\Timestamp\TimestampException::class );
 		$timestamp->getTimestamp( $format );
 	}
 
@@ -352,10 +352,10 @@ class ConvertibleTimestampTest extends \PHPUnit\Framework\TestCase {
 	/**
 	 * @dataProvider provideInvalidFormats
 	 * @covers \Wikimedia\Timestamp\ConvertibleTimestamp::getTimestamp
-	 * @expectedException \Wikimedia\Timestamp\TimestampException
 	 */
 	public function testInvalidFormat( $format ) {
 		$timestamp = new ConvertibleTimestamp( '1343761268' );
+		$this->expectException( \Wikimedia\Timestamp\TimestampException::class );
 		$timestamp->getTimestamp( $format );
 	}
 
@@ -376,10 +376,10 @@ class ConvertibleTimestampTest extends \PHPUnit\Framework\TestCase {
 
 	/**
 	 * @covers \Wikimedia\Timestamp\ConvertibleTimestamp::setTimezone
-	 * @expectedException \Wikimedia\Timestamp\TimestampException
 	 */
 	public function testSetTimezoneInvalid() {
 		$timestamp = new ConvertibleTimestamp( 0 );
+		$this->expectException( \Wikimedia\Timestamp\TimestampException::class );
 		$timestamp->setTimezone( 'Invalid' );
 	}
 
