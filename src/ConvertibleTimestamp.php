@@ -43,10 +43,13 @@ class ConvertibleTimestamp {
 		TS_DB => 'Y-m-d H:i:s',
 		TS_ISO_8601 => 'Y-m-d\TH:i:s\Z',
 		TS_ISO_8601_BASIC => 'Ymd\THis\Z',
-		TS_EXIF => 'Y:m:d H:i:s', // This shouldn't ever be used, but is included for completeness
+		// This shouldn't ever be used, but is included for completeness
+		TS_EXIF => 'Y:m:d H:i:s',
 		TS_RFC2822 => 'D, d M Y H:i:s',
-		TS_ORACLE => 'd-m-Y H:i:s.u', // Was 'd-M-y h.i.s A' . ' +00:00' before r51500
-		TS_POSTGRES => 'Y-m-d H:i:s+00', // Formerly 'Y-m-d H:i:s' . ' GMT'
+		// Was 'd-M-y h.i.s A' . ' +00:00' before r51500
+		TS_ORACLE => 'd-m-Y H:i:s.u',
+		// Formerly 'Y-m-d H:i:s' . ' GMT'
+		TS_POSTGRES => 'Y-m-d H:i:s+00',
 		TS_UNIX_MICRO => 'U.u',
 	];
 

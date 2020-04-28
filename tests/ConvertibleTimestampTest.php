@@ -57,7 +57,8 @@ class ConvertibleTimestampTest extends \PHPUnit\Framework\TestCase {
 	 * @covers \Wikimedia\Timestamp\ConvertibleTimestamp::__toString
 	 */
 	public function testToString() {
-		$timestamp = new ConvertibleTimestamp( '1406833268' ); // Equivalent to 20140731190108
+		// Value is equivalent to 20140731190108
+		$timestamp = new ConvertibleTimestamp( '1406833268' );
 		$this->assertSame( '1406833268', $timestamp->__toString() );
 
 		$timestamp = new ConvertibleTimestamp( '20140731190108' );
@@ -273,7 +274,9 @@ class ConvertibleTimestampTest extends \PHPUnit\Framework\TestCase {
 			$now,
 			$timestamp->getTimestamp( TS_UNIX ),
 			'now',
-			10.0 // acceptable delta in seconds
+			// Acceptable delta in seconds
+			// TODO: This feature will be removed in PHPUnit 9.
+			10.0
 		);
 	}
 
@@ -285,7 +288,9 @@ class ConvertibleTimestampTest extends \PHPUnit\Framework\TestCase {
 			time(),
 			ConvertibleTimestamp::now( TS_UNIX ),
 			'now',
-			10.0 // acceptable delta in seconds
+			// Acceptable delta in seconds
+			// TODO: This feature will be removed in PHPUnit 9.
+			10.0
 		);
 	}
 
@@ -508,10 +513,12 @@ class ConvertibleTimestampTest extends \PHPUnit\Framework\TestCase {
 	 * [ type, timestamp_of_type ]
 	 */
 	public static function provideOutOfRangeTimestamps() {
+		// Various formats
 		return [
-			// Various formats
-			[ TS_MW, '-62167219201' ], // -0001-12-31T23:59:59Z
-			[ TS_MW, '253402300800' ], // 10000-01-01T00:00:00Z
+			// -0001-12-31T23:59:59Z
+			[ TS_MW, '-62167219201' ],
+			// 10000-01-01T00:00:00Z
+			[ TS_MW, '253402300800' ],
 		];
 	}
 }
