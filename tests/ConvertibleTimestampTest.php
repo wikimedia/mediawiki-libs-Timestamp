@@ -270,13 +270,11 @@ class ConvertibleTimestampTest extends \PHPUnit\Framework\TestCase {
 	public function testValidParseZero() {
 		$now = time();
 		$timestamp = new ConvertibleTimestamp( 0 );
-		$this->assertEquals(
+		$this->assertEqualsWithDelta(
 			$now,
 			$timestamp->getTimestamp( TS_UNIX ),
-			'now',
-			// Acceptable delta in seconds
-			// TODO: This feature will be removed in PHPUnit 9.
-			10.0
+			10.0,
+			'now'
 		);
 	}
 
@@ -284,13 +282,11 @@ class ConvertibleTimestampTest extends \PHPUnit\Framework\TestCase {
 	 * @covers \Wikimedia\Timestamp\ConvertibleTimestamp::now
 	 */
 	public function testNow() {
-		$this->assertEquals(
+		$this->assertEqualsWithDelta(
 			time(),
 			ConvertibleTimestamp::now( TS_UNIX ),
-			'now',
-			// Acceptable delta in seconds
-			// TODO: This feature will be removed in PHPUnit 9.
-			10.0
+			10.0,
+			'now'
 		);
 	}
 
