@@ -36,6 +36,7 @@ use Exception;
 class ConvertibleTimestamp {
 	/**
 	 * Standard gmdate() formats for the different timestamp types.
+	 * @var string[]
 	 */
 	private static $formats = [
 		TS_UNIX => 'U',
@@ -56,6 +57,7 @@ class ConvertibleTimestamp {
 	/**
 	 * Regexes for setTimestamp(). Named capture groups correspond to format codes for
 	 * DateTime::createFromFormat(). Unnamed groups are ignored.
+	 * @var string[]
 	 */
 	private static $regexes = [
 		// 'TS_DB' => subset of TS_ISO_8601 (with no 'T')

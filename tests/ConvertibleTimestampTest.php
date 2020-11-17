@@ -40,7 +40,7 @@ class ConvertibleTimestampTest extends \PHPUnit\Framework\TestCase {
 		$timestamp = new ConvertibleTimestamp();
 		$this->assertIsString( $timestamp->getTimestamp() );
 		$this->assertNotEmpty( $timestamp->getTimestamp() );
-		$this->assertNotEquals( false, strtotime( $timestamp->getTimestamp( TS_MW ) ) );
+		$this->assertNotFalse( strtotime( $timestamp->getTimestamp( TS_MW ) ) );
 	}
 
 	/**
