@@ -258,15 +258,7 @@ class ConvertibleTimestamp {
 		}
 
 		try {
-			if ( $format[0] === 'U' && $strtime[0] === '-' ) {
-				// Work around an HHVM bug, createFromFormat( 'U' ) doesn't work with
-				// negative timestamps.
-				list( $s, $us ) = $format === 'U u' ? explode( ' ', $strtime ) : [ $strtime, 0 ];
-				$final = DateTime::createFromFormat( '!U u', "0 $us" );
-				$final->sub( new DateInterval( 'PT' . abs( $s ) . 'S' ) );
-			} else {
-				$final = DateTime::createFromFormat( "!$format", $strtime, new DateTimeZone( 'UTC' ) );
-			}
+			$final = DateTime::createFromFormat( "!$format", $strtime, new DateTimeZone( 'UTC' ) );
 		} catch ( Exception $e ) {
 			throw new TimestampException( __METHOD__ . ': Invalid timestamp format.', $e->getCode(), $e );
 		}
