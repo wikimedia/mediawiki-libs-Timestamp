@@ -141,7 +141,7 @@ class ConvertibleTimestamp {
 		}
 
 		if ( is_int( $fakeTime ) ) {
-			$fakeTime = function () use ( $fakeTime ) {
+			$fakeTime = static function () use ( $fakeTime ) {
 				return $fakeTime;
 			};
 		}

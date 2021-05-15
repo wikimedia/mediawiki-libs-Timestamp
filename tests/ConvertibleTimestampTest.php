@@ -196,7 +196,7 @@ class ConvertibleTimestampTest extends \PHPUnit\Framework\TestCase {
 	public function testValidParseOnly( $original, $expected, $format = TS_UNIX_MICRO ) {
 		// Parsing of the 2-digit year in RFC 850 format is tested more extensively below.
 		// For this test, just make sure it doesn't break in 2062.
-		ConvertibleTimestamp::setFakeTime( function () {
+		ConvertibleTimestamp::setFakeTime( static function () {
 			return 1570123766;
 		} );
 
@@ -248,7 +248,7 @@ class ConvertibleTimestampTest extends \PHPUnit\Framework\TestCase {
 		foreach ( $nowTimes as $nowTime ) {
 			$now = \DateTime::createFromFormat( 'Y-m-d H:i:s', $nowTime, $tz )->getTimestamp();
 			$this->assertSame( $nowTime, gmdate( 'Y-m-d H:i:s', $now ), 'sanity check' );
-			ConvertibleTimestamp::setFakeTime( function () use ( $now ) {
+			ConvertibleTimestamp::setFakeTime( static function () use ( $now ) {
 				return $now;
 			} );
 
@@ -412,7 +412,7 @@ class ConvertibleTimestampTest extends \PHPUnit\Framework\TestCase {
 		// fake clock ticks up
 		$fakeTime = (int)ConvertibleTimestamp::convert( TS_UNIX, '20010101000000' );
 		$fakeClock = $fakeTime;
-		ConvertibleTimestamp::setFakeTime( function () use ( &$fakeClock ) {
+		ConvertibleTimestamp::setFakeTime( static function () use ( &$fakeClock ) {
 			return $fakeClock++;
 		} );
 		$this->assertSame( $fakeTime, ConvertibleTimestamp::time() );
