@@ -147,7 +147,7 @@ class ConvertibleTimestamp {
 		}
 
 		$old = static::$fakeTimeCallback;
-		static::$fakeTimeCallback = $fakeTime ? $fakeTime : null;
+		static::$fakeTimeCallback = $fakeTime ?: null;
 		return $old;
 	}
 
@@ -182,10 +182,10 @@ class ConvertibleTimestamp {
 	 */
 	public function setTimestamp( $ts = false ) {
 		$format = null;
+		$strtime = '';
 
 		// We want to catch 0, '', null... but not date strings starting with a letter.
 		if ( !$ts || $ts === "\0\0\0\0\0\0\0\0\0\0\0\0\0\0" ) {
-			$name = 'null';
 			$strtime = (string)self::time();
 			$format = 'U';
 		} else {
@@ -195,11 +195,11 @@ class ConvertibleTimestamp {
 				}
 
 				// Apply RFC 2626 § 11.2 rules for fixing a 2-digit year.
-				// For sanity we apply by year as written, without regard for
+				// We apply by year as written, without regard for
 				// offset within the year or timezone of the input date.
 				if ( isset( $m['y'] ) ) {
-					$pivot = gmdate( 'Y', static::time() ) + 50;
-					$m['Y'] = $pivot - ( $pivot % 100 ) + $m['y'];
+					$pivot = (int)gmdate( 'Y', static::time() ) + 50;
+					$m['Y'] = $pivot - ( $pivot % 100 ) + (int)$m['y'];
 					if ( $m['Y'] > $pivot ) {
 						$m['Y'] -= 100;
 					}
@@ -237,7 +237,7 @@ class ConvertibleTimestamp {
 					// "-1.2 seconds" like we want. So correct the values to match the componentwise
 					// interpretation.
 					$m['U']--;
-					$m['u'] = 1000000 - str_pad( $m['u'], 6, '0' );
+					$m['u'] = 1000000 - (int)str_pad( $m['u'], 6, '0' );
 				}
 
 				$filtered = [];
@@ -318,8 +318,8 @@ class ConvertibleTimestamp {
 		$timestamp->setTimezone( new DateTimeZone( 'UTC' ) );
 
 		if ( $style === TS_UNIX_MICRO ) {
-			$seconds = $timestamp->format( 'U' );
-			$microseconds = $timestamp->format( 'u' );
+			$seconds = (int)$timestamp->format( 'U' );
+			$microseconds = (int)$timestamp->format( 'u' );
 			if ( $seconds < 0 && $microseconds > 0 ) {
 				// Adjust components to properly create a decimal number for TS_UNIX_MICRO and negative
 				// timestamps. See the comment in setTimestamp() for details.
