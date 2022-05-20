@@ -117,7 +117,7 @@ class ConvertibleTimestamp {
 	/**
 	 * Get the current time in the same form that PHP's built-in time() function uses.
 	 *
-	 * This is used by now() get setTimestamp( false ) instead of the built in time() function.
+	 * This is used by now() through setTimestamp( false ) instead of the built in time() function.
 	 * The output of this method can be overwritten for testing purposes by calling setFakeTime().
 	 *
 	 * @return int UNIX epoch
@@ -162,6 +162,7 @@ class ConvertibleTimestamp {
 	 * or the current time if unspecified.
 	 *
 	 * @param bool|string|int|float|DateTime $timestamp Timestamp to set, or false for current time
+	 * @throws TimestampException
 	 */
 	public function __construct( $timestamp = false ) {
 		if ( $timestamp instanceof DateTime ) {
@@ -345,6 +346,7 @@ class ConvertibleTimestamp {
 
 	/**
 	 * @return string
+	 * @throws TimestampException
 	 */
 	public function __toString() {
 		return $this->getTimestamp();
