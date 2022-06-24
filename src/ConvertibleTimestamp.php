@@ -29,6 +29,7 @@ use DateInterval;
 use DateTime;
 use DateTimeZone;
 use Exception;
+use InvalidArgumentException;
 
 /**
  * Library for creating, parsing, and converting timestamps.
@@ -123,7 +124,7 @@ class ConvertibleTimestamp {
 	 * @return int UNIX epoch
 	 */
 	public static function time() {
-		return static::$fakeTimeCallback ? call_user_func( static::$fakeTimeCallback ) : \time();
+		return static::$fakeTimeCallback ? (int)call_user_func( static::$fakeTimeCallback ) : \time();
 	}
 
 	/**
@@ -170,21 +171,35 @@ class ConvertibleTimestamp {
 	/**
 	 * Set a fake time value or clock callback.
 	 *
-	 * @param callable|string|int|false $fakeTime a fixed time string, or an integer Unix time, or
-	 *   a callback() returning an int representing a UNIX epoch, or false to disable fake time and
-	 *   go back to real time.
+	 * @param callable|ConvertibleTimestamp|string|int|false $fakeTime a fixed time given as a string,
+	 *   or as a number representing seconds since the UNIX epoch; or a callback that returns an int.
+	 *   or false to disable fake time and go back to real time.
+	 * @param int|float $step The number of seconds by which to increment the clock each time
+	 *   the time() method is called. Must not be smaller than zero.
+	 *   Ignored if $fakeTime is a callback or false.
 	 *
 	 * @return callable|null the previous fake time callback, if any.
 	 */
-	public static function setFakeTime( $fakeTime ) {
+	public static function setFakeTime( $fakeTime, $step = 0 ) {
+		if ( $fakeTime instanceof ConvertibleTimestamp ) {
+			$fakeTime = (int)$fakeTime->getTimestamp();
+		}
+
 		if ( is_string( $fakeTime ) ) {
 			$fakeTime = (int)static::convert( TS_UNIX, $fakeTime );
 		}
 
 		if ( is_int( $fakeTime ) ) {
-			$fakeTime = static function () use ( $fakeTime ) {
-				return $fakeTime;
+			$clock = $fakeTime;
+			$fakeTime = static function () use ( &$clock, $step ) {
+				$t = $clock;
+				$clock += $step;
+				return (int)$t;
 			};
+		}
+
+		if ( $fakeTime && !is_callable( $fakeTime ) ) {
+			throw new InvalidArgumentException( 'Bad fake time' );
 		}
 
 		$old = static::$fakeTimeCallback;

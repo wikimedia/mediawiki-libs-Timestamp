@@ -30,7 +30,7 @@ class ConvertibleTimestampTest extends \PHPUnit\Framework\TestCase {
 
 	protected function tearDown(): void {
 		parent::tearDown();
-		ConvertibleTimestamp::setFakeTime( null );
+		ConvertibleTimestamp::setFakeTime( false );
 	}
 
 	/**
@@ -431,13 +431,64 @@ class ConvertibleTimestampTest extends \PHPUnit\Framework\TestCase {
 		$this->assertSame( '20200202112233', ConvertibleTimestamp::convert( TS_MW, false ) );
 		$this->assertSame( '20200202112233', ConvertibleTimestamp::now() );
 
+		$fakeTime = new ConvertibleTimestamp( '20200202030201' );
+		ConvertibleTimestamp::setFakeTime( $fakeTime );
+		$this->assertSame( (int)$fakeTime->getTimestamp(), ConvertibleTimestamp::time() );
+
+		// test starting at date string
+		$ts = '2020-01-01T03:04:05Z';
+		$timestampUnix = (int)ConvertibleTimestamp::convert( TS_UNIX, $ts );
+		ConvertibleTimestamp::setFakeTime( $ts );
+		$this->assertSame( $timestampUnix, ConvertibleTimestamp::time() );
+
+		// test starting with a ConvertibleTimestamp object
+		$ts = new ConvertibleTimestamp( '2020-01-01T03:04:05Z' );
+		ConvertibleTimestamp::setFakeTime( $ts );
+		$this->assertSame( (int)$ts->getTimestamp(), ConvertibleTimestamp::time() );
+
 		// no more fake time
 		$old = ConvertibleTimestamp::setFakeTime( false );
 		$this->assertInstanceOf( Closure::class, $old );
-		$this->assertSame( '20200202112233', ConvertibleTimestamp::convert( TS_MW, $old() ) );
+		$this->assertSame( $ts->getTimestamp( TS_MW ), ConvertibleTimestamp::convert( TS_MW, $old() ) );
 
-		$this->assertNotSame( '20200202112233', ConvertibleTimestamp::now() );
+		$this->assertNotSame( $ts->getTimestamp( TS_MW ), ConvertibleTimestamp::now() );
 		$this->assertNotSame( $fakeTime, ConvertibleTimestamp::time() );
+	}
+
+	/**
+	 * @covers \Wikimedia\Timestamp\ConvertibleTimestamp::setFakeTime
+	 */
+	public function testFakeTimeWithStep() {
+		$wallClockTime = time();
+
+		// test starting at number, step 1
+		$ts = 12345678;
+		ConvertibleTimestamp::setFakeTime( $ts, 1 );
+		$this->assertSame( $ts + 0, ConvertibleTimestamp::time() );
+		$this->assertSame( $ts + 1, ConvertibleTimestamp::time() );
+		$this->assertSame( $ts + 2, ConvertibleTimestamp::time() );
+
+		// test starting at number, step 2
+		$ts = 12345678;
+		ConvertibleTimestamp::setFakeTime( $ts, 2 );
+		$this->assertSame( $ts + 0, ConvertibleTimestamp::time() );
+		$this->assertSame( $ts + 2, ConvertibleTimestamp::time() );
+		$this->assertSame( $ts + 4, ConvertibleTimestamp::time() );
+
+		// test starting at number, step 0.75
+		$ts = 12345678;
+		ConvertibleTimestamp::setFakeTime( $ts, 0.75 );
+		$this->assertSame( $ts + 0, ConvertibleTimestamp::time() );
+		$this->assertSame( $ts + 0, ConvertibleTimestamp::time() );
+		$this->assertSame( $ts + 1, ConvertibleTimestamp::time() );
+		$this->assertSame( $ts + 2, ConvertibleTimestamp::time() );
+		$this->assertSame( $ts + 3, ConvertibleTimestamp::time() );
+		$this->assertSame( $ts + 3, ConvertibleTimestamp::time() );
+		$this->assertSame( $ts + 4, ConvertibleTimestamp::time() );
+
+		// back to real time
+		ConvertibleTimestamp::setFakeTime( false );
+		$this->assertGreaterThanOrEqual( $wallClockTime, ConvertibleTimestamp::time() );
 	}
 
 	/**
