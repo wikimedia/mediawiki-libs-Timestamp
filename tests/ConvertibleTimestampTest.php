@@ -252,7 +252,7 @@ class ConvertibleTimestampTest extends \PHPUnit\Framework\TestCase {
 				return $now;
 			} );
 
-			foreach ( $timestamps as list( $ts, $expectYear ) ) {
+			foreach ( $timestamps as [ $ts, $expectYear ] ) {
 				$timestamp = new ConvertibleTimestamp( $ts );
 				$timestamp->setTimezone( 'UTC' );
 				$this->assertEquals(
@@ -441,6 +441,35 @@ class ConvertibleTimestampTest extends \PHPUnit\Framework\TestCase {
 	}
 
 	/**
+	 * @covers \Wikimedia\Timestamp\ConvertibleTimestamp::setFakeTime
+	 * @covers \Wikimedia\Timestamp\ConvertibleTimestamp::microtime
+	 */
+	public function testFakeMicroTime() {
+		$t = 1000000;
+		ConvertibleTimestamp::setFakeTime( $t );
+		$time = ConvertibleTimestamp::time();
+		$this->assertEquals( $t, $time );
+
+		$microtime = ConvertibleTimestamp::microtime();
+		$this->assertGreaterThanOrEqual( $t, $microtime );
+		$this->assertLessThanOrEqual( 1, $microtime - $t );
+
+		$microtime2 = ConvertibleTimestamp::microtime();
+		$this->assertGreaterThan( $microtime, $microtime2 );
+		$this->assertLessThan( 1, $microtime2 - $microtime );
+
+		$t2 = $t + 1;
+		ConvertibleTimestamp::setFakeTime( $t2 );
+		$time = ConvertibleTimestamp::time();
+		$this->assertEquals( $t2, $time );
+
+		$microtime = ConvertibleTimestamp::microtime();
+		$this->assertGreaterThanOrEqual( $t2, $microtime );
+		$this->assertGreaterThan( $microtime2, $microtime );
+		$this->assertLessThanOrEqual( 1, $microtime - $t2 );
+	}
+
+	/**
 	 * Returns a list of valid timestamps in the format:
 	 * [ type, timestamp_of_type, timestamp_in_MW ]
 	 */
@@ -517,4 +546,17 @@ class ConvertibleTimestampTest extends \PHPUnit\Framework\TestCase {
 			[ TS_MW, '253402300800' ],
 		];
 	}
+
+	/**
+	 * @covers \Wikimedia\Timestamp\ConvertibleTimestamp::time
+	 * @covers \Wikimedia\Timestamp\ConvertibleTimestamp::microtime
+	 */
+	public function testClockTime() {
+		$time = ConvertibleTimestamp::time();
+		$microtime = ConvertibleTimestamp::microtime();
+
+		$this->assertGreaterThanOrEqual( 0, $microtime - $time );
+		$this->assertLessThanOrEqual( 1, $microtime - $time );
+	}
+
 }

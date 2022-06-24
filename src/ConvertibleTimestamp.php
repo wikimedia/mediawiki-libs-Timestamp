@@ -127,6 +127,47 @@ class ConvertibleTimestamp {
 	}
 
 	/**
+	 * Get the current time as seconds since the epoch, with sub-second precision.
+	 * This is equivalent to calling PHP's built-in microtime() function with $as_float = true.
+	 * The exact precision depends on the underlying operating system.
+	 *
+	 * Subsequent calls to microtime() are very unlikely to return the same value twice,
+	 * and the values returned should be increasing. But there is no absolute guarantee
+	 * of either of these properties.
+	 *
+	 * The output of this method can be overwritten for testing purposes by calling setFakeTime().
+	 * In that case, microtime() will use the return value of time(), with a monotonic counter
+	 * used to make the return value of subsequent calls different from each other by a fraction
+	 * of a second.
+	 *
+	 * @return float Seconds since the epoch
+	 */
+	public static function microtime(): float {
+		static $fakeSecond = 0;
+		static $fakeOffset = 0.0;
+
+		if ( static::$fakeTimeCallback ) {
+			$sec = static::time();
+
+			// Use the fake time returned by time(), but add a microsecond each
+			// time this method is called, so subsequent calls to this method
+			// never return the same value. Reset the counter when the time
+			// returned by time() is different from the value it returned
+			// previously.
+			if ( $sec !== $fakeSecond ) {
+				$fakeSecond = $sec;
+				$fakeOffset = 0.0;
+			} else {
+				$fakeOffset++;
+			}
+
+			return $fakeSecond + $fakeOffset * 0.000001;
+		} else {
+			return microtime( true );
+		}
+	}
+
+	/**
 	 * Set a fake time value or clock callback.
 	 *
 	 * @param callable|string|int|false $fakeTime a fixed time string, or an integer Unix time, or
