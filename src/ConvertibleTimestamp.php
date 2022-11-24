@@ -420,6 +420,42 @@ class ConvertibleTimestamp {
 	}
 
 	/**
+	 * Add an interval to the timestamp.
+	 * @param DateInterval|string $interval DateInterval or DateInterval specification (such as "P2D")
+	 * @return $this
+	 * @throws TimestampException
+	 */
+	public function add( $interval ) {
+		if ( is_string( $interval ) ) {
+			try {
+				$interval = new DateInterval( $interval );
+			} catch ( Exception $e ) {
+				throw new TimestampException( __METHOD__ . ': Invalid interval.', $e->getCode(), $e );
+			}
+		}
+		$this->timestamp->add( $interval );
+		return $this;
+	}
+
+	/**
+	 * Subtract an interval from the timestamp.
+	 * @param DateInterval|string $interval DateInterval or DateInterval specification (such as "P2D")
+	 * @return $this
+	 * @throws TimestampException
+	 */
+	public function sub( $interval ) {
+		if ( is_string( $interval ) ) {
+			try {
+				$interval = new DateInterval( $interval );
+			} catch ( Exception $e ) {
+				throw new TimestampException( __METHOD__ . ': Invalid interval.', $e->getCode(), $e );
+			}
+		}
+		$this->timestamp->sub( $interval );
+		return $this;
+	}
+
+	/**
 	 * Set the timezone of this timestamp to the specified timezone.
 	 *
 	 * @param string $timezone Timezone to set

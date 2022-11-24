@@ -24,6 +24,7 @@
 namespace Wikimedia\Timestamp\Test;
 
 use Closure;
+use DateInterval;
 use Wikimedia\Timestamp\ConvertibleTimestamp;
 
 class ConvertibleTimestampTest extends \PHPUnit\Framework\TestCase {
@@ -83,6 +84,22 @@ class ConvertibleTimestampTest extends \PHPUnit\Framework\TestCase {
 		$timestamp2 = new ConvertibleTimestamp( $timestamp2 );
 		$diff = $timestamp1->diff( $timestamp2 );
 		$this->assertEquals( $expected, $diff->format( '%D %H %I %S' ) );
+	}
+
+	/**
+	 * @covers \Wikimedia\Timestamp\ConvertibleTimestamp::add
+	 * @covers \Wikimedia\Timestamp\ConvertibleTimestamp::sub
+	 */
+	public function testAddSub() {
+		$timestamp = new ConvertibleTimestamp( '2022-01-01 10:00:00' );
+		$timestamp->add( new DateInterval( 'P1D' ) );
+		$this->assertEquals( '2022-01-02 10:00:00', $timestamp->getTimestamp( TS_DB ) );
+		$timestamp->add( 'P1D' );
+		$this->assertEquals( '2022-01-03 10:00:00', $timestamp->getTimestamp( TS_DB ) );
+		$timestamp->sub( new DateInterval( 'P1D' ) );
+		$this->assertEquals( '2022-01-02 10:00:00', $timestamp->getTimestamp( TS_DB ) );
+		$timestamp->sub( 'P1D' );
+		$this->assertEquals( '2022-01-01 10:00:00', $timestamp->getTimestamp( TS_DB ) );
 	}
 
 	/**
