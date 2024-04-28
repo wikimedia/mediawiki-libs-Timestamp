@@ -30,6 +30,7 @@ use DateTime;
 use DateTimeZone;
 use Exception;
 use InvalidArgumentException;
+use ValueError;
 
 /**
  * Library for creating, parsing, and converting timestamps.
@@ -84,7 +85,7 @@ class ConvertibleTimestamp {
 		'TS_EXIF' => '/^(?<Y>\d{4}):(?<m>\d\d):(?<d>\d\d) (?<H>\d\d):(?<i>\d\d):(?<s>\d\d)$/D',
 
 		'TS_RFC2822' =>
-			# Day of week
+			# Day of the week
 			'/^[ \t\r\n]*(?:(?<D>[A-Z][a-z]{2}),[ \t\r\n]*)?' .
 			# dd Mon yyyy
 			'(?<d>\d\d?)[ \t\r\n]+(?<M>[A-Z][a-z]{2})[ \t\r\n]+(?<Y>\d{2,})' .
@@ -318,7 +319,7 @@ class ConvertibleTimestamp {
 
 		try {
 			$final = DateTime::createFromFormat( "!$format", $strtime, new DateTimeZone( 'UTC' ) );
-		} catch ( \ValueError $e ) {
+		} catch ( ValueError $e ) {
 			throw new TimestampException( __METHOD__ . ': Invalid timestamp format.', $e->getCode(), $e );
 		}
 

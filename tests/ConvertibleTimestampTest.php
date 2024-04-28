@@ -25,9 +25,11 @@ namespace Wikimedia\Timestamp\Test;
 
 use Closure;
 use DateInterval;
+use PHPUnit\Framework\TestCase;
 use Wikimedia\Timestamp\ConvertibleTimestamp;
+use Wikimedia\Timestamp\TimestampException;
 
-class ConvertibleTimestampTest extends \PHPUnit\Framework\TestCase {
+class ConvertibleTimestampTest extends TestCase {
 
 	protected function tearDown(): void {
 		parent::tearDown();
@@ -248,7 +250,7 @@ class ConvertibleTimestampTest extends \PHPUnit\Framework\TestCase {
 	public function test2DigitYearHandling( $thisYear, $inYear, $outYear ) {
 		$tz = new \DateTimeZone( 'UTC' );
 
-		// We test with an "now" at the beginning and end of the year
+		// We test with a "now" at the beginning and end of the year
 		$nowTimes = [ "$thisYear-01-01 00:00:00", "$thisYear-12-31 23:59:59" ];
 
 		// Test a timestamp in the middle of the year, plus for sanity checking
@@ -314,7 +316,7 @@ class ConvertibleTimestampTest extends \PHPUnit\Framework\TestCase {
 	 * @covers \Wikimedia\Timestamp\ConvertibleTimestamp::setTimestamp
 	 */
 	public function testInvalidParse( $input ) {
-		$this->expectException( \Wikimedia\Timestamp\TimestampException::class );
+		$this->expectException( TimestampException::class );
 		new ConvertibleTimestamp( $input );
 	}
 
@@ -355,7 +357,7 @@ class ConvertibleTimestampTest extends \PHPUnit\Framework\TestCase {
 	 */
 	public function testOutOfRangeTimestamps( $format, $input ) {
 		$timestamp = new ConvertibleTimestamp( $input );
-		$this->expectException( \Wikimedia\Timestamp\TimestampException::class );
+		$this->expectException( TimestampException::class );
 		$timestamp->getTimestamp( $format );
 	}
 
@@ -373,7 +375,7 @@ class ConvertibleTimestampTest extends \PHPUnit\Framework\TestCase {
 	 */
 	public function testInvalidFormat( $format ) {
 		$timestamp = new ConvertibleTimestamp( '1343761268' );
-		$this->expectException( \Wikimedia\Timestamp\TimestampException::class );
+		$this->expectException( TimestampException::class );
 		$timestamp->getTimestamp( $format );
 	}
 
@@ -397,7 +399,7 @@ class ConvertibleTimestampTest extends \PHPUnit\Framework\TestCase {
 	 */
 	public function testSetTimezoneInvalid() {
 		$timestamp = new ConvertibleTimestamp( 0 );
-		$this->expectException( \Wikimedia\Timestamp\TimestampException::class );
+		$this->expectException( TimestampException::class );
 		$timestamp->setTimezone( 'Invalid' );
 	}
 
