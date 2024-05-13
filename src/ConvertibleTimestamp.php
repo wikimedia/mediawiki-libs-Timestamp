@@ -220,7 +220,8 @@ class ConvertibleTimestamp {
 	 * Make a new timestamp and set it to the specified time,
 	 * or the current time if unspecified.
 	 *
-	 * @param bool|string|int|float|DateTime $timestamp Timestamp to set, or false for current time
+	 * @param string|int|float|null|false|DateTime $timestamp Timestamp to set.
+	 *   If any falsy value is provided, the timestamp uses the current time instead.
 	 * @throws TimestampException
 	 */
 	public function __construct( $timestamp = false ) {
@@ -237,7 +238,8 @@ class ConvertibleTimestamp {
 	 * Parse the given timestamp into either a DateTime object or a Unix timestamp,
 	 * and then store it.
 	 *
-	 * @param string|bool $ts Timestamp to store, or false for now
+	 * @param string|int|float|null|false $ts Timestamp to store.
+	 *   If any falsy value is provided, the timestamp uses the current time instead.
 	 * @throws TimestampException
 	 */
 	public function setTimestamp( $ts = false ) {
@@ -336,7 +338,7 @@ class ConvertibleTimestamp {
 	 * except it returns false instead of throwing an exception.
 	 *
 	 * @param int $style Constant Output format for timestamp
-	 * @param string|int|float|bool|DateTime $ts Timestamp
+	 * @param string|int|float|null|false|DateTime $ts Timestamp
 	 * @return string|false Formatted timestamp or false on failure
 	 */
 	public static function convert( $style, $ts ) {
@@ -415,7 +417,7 @@ class ConvertibleTimestamp {
 	 * Calculate the difference between two ConvertibleTimestamp objects.
 	 *
 	 * @param ConvertibleTimestamp $relativeTo Base time to calculate difference from
-	 * @return DateInterval|bool The DateInterval object representing the
+	 * @return DateInterval|false The DateInterval object representing the
 	 *   difference between the two dates or false on failure
 	 */
 	public function diff( ConvertibleTimestamp $relativeTo ) {
