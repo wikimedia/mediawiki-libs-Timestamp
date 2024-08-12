@@ -29,6 +29,9 @@ use PHPUnit\Framework\TestCase;
 use Wikimedia\Timestamp\ConvertibleTimestamp;
 use Wikimedia\Timestamp\TimestampException;
 
+/**
+ * @covers \Wikimedia\Timestamp\ConvertibleTimestamp
+ */
 class ConvertibleTimestampTest extends TestCase {
 
 	protected function tearDown(): void {
@@ -36,9 +39,6 @@ class ConvertibleTimestampTest extends TestCase {
 		ConvertibleTimestamp::setFakeTime( false );
 	}
 
-	/**
-	 * @covers \Wikimedia\Timestamp\ConvertibleTimestamp::__construct
-	 */
 	public function testConstructWithoutTimestamp() {
 		$timestamp = new ConvertibleTimestamp();
 		$this->assertIsString( $timestamp->getTimestamp() );
@@ -46,9 +46,6 @@ class ConvertibleTimestampTest extends TestCase {
 		$this->assertNotFalse( strtotime( $timestamp->getTimestamp( TS_MW ) ) );
 	}
 
-	/**
-	 * @covers \Wikimedia\Timestamp\ConvertibleTimestamp::__construct
-	 */
 	public function testConstructWithDateTime() {
 		$input = '1343761268';
 		$dt = new \DateTime( "@$input", new \DateTimeZone( 'GMT' ) );
@@ -56,9 +53,6 @@ class ConvertibleTimestampTest extends TestCase {
 		$this->assertSame( $input, $timestamp->getTimestamp() );
 	}
 
-	/**
-	 * @covers \Wikimedia\Timestamp\ConvertibleTimestamp::__toString
-	 */
 	public function testToString() {
 		// Value is equivalent to 20140731190108
 		$timestamp = new ConvertibleTimestamp( '1406833268' );
@@ -79,7 +73,6 @@ class ConvertibleTimestampTest extends TestCase {
 
 	/**
 	 * @dataProvider provideDiff
-	 * @covers \Wikimedia\Timestamp\ConvertibleTimestamp::diff
 	 */
 	public function testDiff( $timestamp1, $timestamp2, $expected ) {
 		$timestamp1 = new ConvertibleTimestamp( $timestamp1 );
@@ -88,10 +81,6 @@ class ConvertibleTimestampTest extends TestCase {
 		$this->assertEquals( $expected, $diff->format( '%D %H %I %S' ) );
 	}
 
-	/**
-	 * @covers \Wikimedia\Timestamp\ConvertibleTimestamp::add
-	 * @covers \Wikimedia\Timestamp\ConvertibleTimestamp::sub
-	 */
 	public function testAddSub() {
 		$timestamp = new ConvertibleTimestamp( '2022-01-01 10:00:00' );
 		$timestamp->add( new DateInterval( 'P1D' ) );
@@ -108,8 +97,6 @@ class ConvertibleTimestampTest extends TestCase {
 	 * Parse valid timestamps and output in MW format.
 	 *
 	 * @dataProvider provideValidTimestamps
-	 * @covers \Wikimedia\Timestamp\ConvertibleTimestamp::setTimestamp
-	 * @covers \Wikimedia\Timestamp\ConvertibleTimestamp::getTimestamp
 	 */
 	public function testValidParse( $originalFormat, $original, $expectedFormat, $expected ) {
 		$timestamp = new ConvertibleTimestamp( $original );
@@ -210,7 +197,6 @@ class ConvertibleTimestampTest extends TestCase {
 
 	/**
 	 * @dataProvider provideParseOnly
-	 * @covers \Wikimedia\Timestamp\ConvertibleTimestamp::setTimestamp
 	 */
 	public function testValidParseOnly( $original, $expected, $format = TS_UNIX_MICRO ) {
 		// Parsing of the 2-digit year in RFC 850 format is tested more extensively below.
@@ -245,7 +231,6 @@ class ConvertibleTimestampTest extends TestCase {
 
 	/**
 	 * @dataProvider provide2DigitYearHandling
-	 * @covers \Wikimedia\Timestamp\ConvertibleTimestamp::setTimestamp
 	 */
 	public function test2DigitYearHandling( $thisYear, $inYear, $outYear ) {
 		$tz = new \DateTimeZone( 'UTC' );
@@ -283,9 +268,6 @@ class ConvertibleTimestampTest extends TestCase {
 		}
 	}
 
-	/**
-	 * @covers \Wikimedia\Timestamp\ConvertibleTimestamp::setTimestamp
-	 */
 	public function testValidParseZero() {
 		$now = time();
 		$timestamp = new ConvertibleTimestamp( 0 );
@@ -297,9 +279,6 @@ class ConvertibleTimestampTest extends TestCase {
 		);
 	}
 
-	/**
-	 * @covers \Wikimedia\Timestamp\ConvertibleTimestamp::now
-	 */
 	public function testNow() {
 		$this->assertEqualsWithDelta(
 			time(),
@@ -310,10 +289,7 @@ class ConvertibleTimestampTest extends TestCase {
 	}
 
 	/**
-	 * Parse invalid timestamps.
-	 *
 	 * @dataProvider provideInvalidTimestamps
-	 * @covers \Wikimedia\Timestamp\ConvertibleTimestamp::setTimestamp
 	 */
 	public function testInvalidParse( $input ) {
 		$this->expectException( TimestampException::class );
@@ -324,7 +300,6 @@ class ConvertibleTimestampTest extends TestCase {
 	 * Output valid timestamps in different formats.
 	 *
 	 * @dataProvider provideValidTimestamps
-	 * @covers \Wikimedia\Timestamp\ConvertibleTimestamp::getTimestamp
 	 */
 	public function testValidFormats( $expectedFormat, $expected, $originalFormat, $original ) {
 		$timestamp = new ConvertibleTimestamp( $original );
@@ -333,27 +308,20 @@ class ConvertibleTimestampTest extends TestCase {
 
 	/**
 	 * @dataProvider provideValidTimestamps
-	 * @covers \Wikimedia\Timestamp\ConvertibleTimestamp::convert
 	 */
 	public function testConvert( $expectedFormat, $expected, $originalFormat, $original ) {
 		$this->assertSame( $expected, ConvertibleTimestamp::convert( $expectedFormat, $original ) );
 	}
 
 	/**
-	 * Format an invalid timestamp.
-	 *
 	 * @dataProvider provideInvalidTimestamps
-	 * @covers \Wikimedia\Timestamp\ConvertibleTimestamp::convert
 	 */
 	public function testConvertInvalid( $input ) {
 		$this->assertSame( false, ConvertibleTimestamp::convert( TS_UNIX, $input ) );
 	}
 
 	/**
-	 * Test an out-of-range timestamp.
-	 *
 	 * @dataProvider provideOutOfRangeTimestamps
-	 * @covers \Wikimedia\Timestamp\ConvertibleTimestamp
 	 */
 	public function testOutOfRangeTimestamps( $format, $input ) {
 		$timestamp = new ConvertibleTimestamp( $input );
@@ -371,7 +339,6 @@ class ConvertibleTimestampTest extends TestCase {
 
 	/**
 	 * @dataProvider provideInvalidFormats
-	 * @covers \Wikimedia\Timestamp\ConvertibleTimestamp::getTimestamp
 	 */
 	public function testInvalidFormat( $format ) {
 		$timestamp = new ConvertibleTimestamp( '1343761268' );
@@ -379,9 +346,6 @@ class ConvertibleTimestampTest extends TestCase {
 		$timestamp->getTimestamp( $format );
 	}
 
-	/**
-	 * @covers \Wikimedia\Timestamp\ConvertibleTimestamp::setTimezone
-	 */
 	public function testSetTimezone() {
 		$timestamp = new ConvertibleTimestamp( '2012-07-31 19:01:08' );
 		$this->assertSame( '2012-07-31 19:01:08+0000', $timestamp->format( 'Y-m-d H:i:sO' ) );
@@ -394,18 +358,12 @@ class ConvertibleTimestampTest extends TestCase {
 		$this->assertSame( '2012-07-31 19:01:08+0000', $timestamp->format( 'Y-m-d H:i:sO' ) );
 	}
 
-	/**
-	 * @covers \Wikimedia\Timestamp\ConvertibleTimestamp::setTimezone
-	 */
 	public function testSetTimezoneInvalid() {
 		$timestamp = new ConvertibleTimestamp( 0 );
 		$this->expectException( TimestampException::class );
 		$timestamp->setTimezone( 'Invalid' );
 	}
 
-	/**
-	 * @covers \Wikimedia\Timestamp\ConvertibleTimestamp::getTimezone
-	 */
 	public function testGetTimezone() {
 		$timestamp = new ConvertibleTimestamp( 0 );
 		$this->assertInstanceOf(
@@ -414,19 +372,12 @@ class ConvertibleTimestampTest extends TestCase {
 		);
 	}
 
-	/**
-	 * @covers \Wikimedia\Timestamp\ConvertibleTimestamp::format
-	 */
 	public function testFormat() {
 		$timestamp = new ConvertibleTimestamp( '1343761268' );
 		$this->assertSame( '1343761268', $timestamp->format( 'U' ) );
 		$this->assertSame( '20120731190108', $timestamp->format( 'YmdHis' ) );
 	}
 
-	/**
-	 * @covers \Wikimedia\Timestamp\ConvertibleTimestamp::setFakeTime
-	 * @covers \Wikimedia\Timestamp\ConvertibleTimestamp::time
-	 */
 	public function testFakeTime() {
 		// fake clock ticks up
 		$fakeTime = (int)ConvertibleTimestamp::convert( TS_UNIX, '20010101000000' );
@@ -474,9 +425,6 @@ class ConvertibleTimestampTest extends TestCase {
 		$this->assertNotSame( $fakeTime, ConvertibleTimestamp::time() );
 	}
 
-	/**
-	 * @covers \Wikimedia\Timestamp\ConvertibleTimestamp::setFakeTime
-	 */
 	public function testFakeTimeWithStep() {
 		$wallClockTime = time();
 
@@ -510,10 +458,6 @@ class ConvertibleTimestampTest extends TestCase {
 		$this->assertGreaterThanOrEqual( $wallClockTime, ConvertibleTimestamp::time() );
 	}
 
-	/**
-	 * @covers \Wikimedia\Timestamp\ConvertibleTimestamp::setFakeTime
-	 * @covers \Wikimedia\Timestamp\ConvertibleTimestamp::microtime
-	 */
 	public function testFakeMicroTime() {
 		$t = 1000000;
 		ConvertibleTimestamp::setFakeTime( $t );
@@ -617,10 +561,6 @@ class ConvertibleTimestampTest extends TestCase {
 		];
 	}
 
-	/**
-	 * @covers \Wikimedia\Timestamp\ConvertibleTimestamp::time
-	 * @covers \Wikimedia\Timestamp\ConvertibleTimestamp::microtime
-	 */
 	public function testClockTime() {
 		$time = ConvertibleTimestamp::time();
 		$microtime = ConvertibleTimestamp::microtime();
