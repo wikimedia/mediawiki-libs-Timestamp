@@ -130,42 +130,72 @@ class ConvertibleTimestamp {
 
 	/**
 	 * Get the current time as seconds since the epoch, with sub-second precision.
-	 * This is equivalent to calling PHP's built-in microtime() function with $as_float = true.
+	 *
+	 * This is equivalent to calling PHP's built-in `microtime(true)`.
 	 * The exact precision depends on the underlying operating system.
 	 *
-	 * Subsequent calls to microtime() are very unlikely to return the same value twice,
-	 * and the values returned should be increasing. But there is no absolute guarantee
-	 * of either of these properties.
+	 * You can overwrite microtime for testing purposes by calling setFakeTime().
+	 * In that case, this will re-use the fake time() value in seconds, and add a
+	 * fake microsecond fraction based on an increasing counter.
 	 *
-	 * The output of this method can be overwritten for testing purposes by calling setFakeTime().
-	 * In that case, microtime() will use the return value of time(), with a monotonic counter
-	 * used to make the return value of subsequent calls different from each other by a fraction
-	 * of a second.
+	 * Repeated calls to microtime() are likely to return unique and increasing values.
+	 * But, there is no guarantee of this, due to clock skew and clock drift correction.
+	 * To measure time spent between two points in the code, use the ::hrtime() instead.
 	 *
+	 * @deprecated To measure relative duration, use ::hrtime(). For timestamps, use ::time().
 	 * @return float Seconds since the epoch
 	 */
 	public static function microtime(): float {
+		trigger_error( __METHOD__ . ' use ::hrtime() instead.', E_USER_DEPRECATED );
+
 		static $fakeSecond = 0;
 		static $fakeOffset = 0.0;
-
 		if ( static::$fakeTimeCallback ) {
 			$sec = static::time();
-
-			// Use the fake time returned by time(), but add a microsecond each
-			// time this method is called, so subsequent calls to this method
-			// never return the same value. Reset the counter when the time
-			// returned by time() is different from the value it returned
-			// previously.
 			if ( $sec !== $fakeSecond ) {
 				$fakeSecond = $sec;
 				$fakeOffset = 0.0;
 			} else {
 				$fakeOffset++;
 			}
-
 			return $fakeSecond + $fakeOffset * 0.000001;
 		} else {
 			return microtime( true );
+		}
+	}
+
+	/**
+	 * Get the value of a monotonic clock in nanoseconds.
+	 *
+	 * This is equivalent to calling PHP's built-in `hrtime(true)`. Repeated calls to
+	 * hrtime() are guruanteed to be equal to or higher than the previous call. It is
+	 * designed to measure time between two calls, and is not affected by clock
+	 * drift correction, and thus does not represent any kind of date or timestamp.
+	 *
+	 * The output of this method can be controlled for testing purposes by calling
+	 * setFakeTime() with any value. In that case, hrtime() will always increment
+	 * its arbitrary starting amount by 1 millisecond every time the function is
+	 * called.
+	 *
+	 * @see https://www.php.net/hrtime
+	 * @return int|float Monotonic nanoseconds since an arbitrary starting point
+	 */
+	public static function hrtime() {
+		static $fakeNanoMono = 41_999_000_000;
+
+		if ( static::$fakeTimeCallback ) {
+			// Use a fake start. We ignore the actual fake time because:
+			// 1. Using it would make it easy to mistakenly use it as a timestamp.
+			// 2. Multiplying time() by 1e9 for nanoseconds since 1970 is larger than
+			//    fits in float precision, thus causing all kinds of accuracy problems.
+			//
+			// We add 1 millisecond each time this method is called, so that it is always
+			// increasing, and ensures `b - a` gives a deterministic end result that can
+			// be strictly asserted in a unit test.
+			$fakeNanoMono += 1_000_000;
+			return $fakeNanoMono;
+		} else {
+			return hrtime( true );
 		}
 	}
 
