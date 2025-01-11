@@ -332,14 +332,16 @@ class ConvertibleTimestamp {
 					$m['u'] = 1000000 - (int)str_pad( $m['u'], 6, '0' );
 				}
 
-				$filtered = [];
+				$formatFiltered = [];
+				$strtimeFiltered = [];
 				foreach ( $m as $k => $v ) {
 					if ( !is_int( $k ) && $v !== '' ) {
-						$filtered[$k] = $v;
+						$formatFiltered[] = $k;
+						$strtimeFiltered[] = $v;
 					}
 				}
-				$format = implode( ' ', array_keys( $filtered ) );
-				$strtime = implode( ' ', array_values( $filtered ) );
+				$format = implode( ' ', $formatFiltered );
+				$strtime = implode( ' ', $strtimeFiltered );
 
 				break;
 			}
