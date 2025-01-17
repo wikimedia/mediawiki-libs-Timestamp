@@ -38,9 +38,8 @@ use ValueError;
 class ConvertibleTimestamp {
 	/**
 	 * Standard gmdate() formats for the different timestamp types.
-	 * @var string[]
 	 */
-	private static $formats = [
+	private const FORMATS = [
 		TS_UNIX => 'U',
 		TS_MW => 'YmdHis',
 		TS_DB => 'Y-m-d H:i:s',
@@ -59,9 +58,8 @@ class ConvertibleTimestamp {
 	/**
 	 * Regexes for setTimestamp(). Named capture groups correspond to format codes for
 	 * DateTime::createFromFormat(). Unnamed groups are ignored.
-	 * @var string[]
 	 */
-	private static $regexes = [
+	private const REGEXES = [
 		// 'TS_DB' => subset of TS_ISO_8601 (with no 'T')
 		'TS_MW' => '/^(?<Y>\d{4})(?<m>\d\d)(?<d>\d\d)(?<H>\d\d)(?<i>\d\d)(?<s>\d\d)$/D',
 		'TS_ISO_8601' =>
@@ -281,7 +279,7 @@ class ConvertibleTimestamp {
 			$strtime = (string)self::time();
 			$format = 'U';
 		} else {
-			foreach ( self::$regexes as $name => $regex ) {
+			foreach ( self::REGEXES as $name => $regex ) {
 				if ( !preg_match( $regex, $ts, $m ) ) {
 					continue;
 				}
@@ -403,7 +401,7 @@ class ConvertibleTimestamp {
 	 * @return string The formatted timestamp
 	 */
 	public function getTimestamp( $style = TS_UNIX ) {
-		if ( !isset( self::$formats[$style] ) ) {
+		if ( !isset( self::FORMATS[$style] ) ) {
 			throw new TimestampException( __METHOD__ . ': Illegal timestamp output type.' );
 		}
 
@@ -423,7 +421,7 @@ class ConvertibleTimestamp {
 			return sprintf( "%d.%06d", $seconds, $microseconds );
 		}
 
-		$output = $timestamp->format( self::$formats[$style] );
+		$output = $timestamp->format( self::FORMATS[$style] );
 
 		if ( $style == TS_RFC2822 ) {
 			$output .= ' GMT';
