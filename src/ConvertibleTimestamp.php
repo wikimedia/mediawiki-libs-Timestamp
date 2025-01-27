@@ -402,7 +402,7 @@ class ConvertibleTimestamp {
 	 */
 	public function getTimestamp( $style = TS_UNIX ) {
 		if ( !isset( self::FORMATS[$style] ) ) {
-			throw new TimestampException( __METHOD__ . ': Illegal timestamp output type.' );
+			throw new InvalidArgumentException( __METHOD__ . ': Illegal timestamp output type.' );
 		}
 
 		// All our formats are in UTC, so make sure to use that timezone

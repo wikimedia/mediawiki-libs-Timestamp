@@ -25,6 +25,7 @@ namespace Wikimedia\Timestamp\Test;
 
 use Closure;
 use DateInterval;
+use InvalidArgumentException;
 use PHPUnit\Framework\TestCase;
 use Wikimedia\Timestamp\ConvertibleTimestamp;
 use Wikimedia\Timestamp\TimestampException;
@@ -342,7 +343,7 @@ class ConvertibleTimestampTest extends TestCase {
 	 */
 	public function testInvalidFormat( $format ) {
 		$timestamp = new ConvertibleTimestamp( '1343761268' );
-		$this->expectException( TimestampException::class );
+		$this->expectException( InvalidArgumentException::class );
 		$timestamp->getTimestamp( $format );
 	}
 
