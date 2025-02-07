@@ -123,7 +123,7 @@ class ConvertibleTimestamp {
 	 * @return int UNIX epoch
 	 */
 	public static function time() {
-		return static::$fakeTimeCallback ? (int)call_user_func( static::$fakeTimeCallback ) : \time();
+		return static::$fakeTimeCallback ? (int)( static::$fakeTimeCallback )() : \time();
 	}
 
 	/**
