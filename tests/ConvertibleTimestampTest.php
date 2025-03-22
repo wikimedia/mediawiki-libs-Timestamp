@@ -332,9 +332,10 @@ class ConvertibleTimestampTest extends TestCase {
 
 	public static function provideInvalidFormats() {
 		return [
-			[ 'Not a format' ],
-			[ 98 ],
-			'TS_UNIX_MICRO, excess precision' => [ '1343761268.123456789' ],
+			'Unknown too high' => [ 98 ],
+			'Constant name instead of value' => [ 'TS_UNIX' ],
+			'Custom format' => [ 'Ymd' ],
+			'Bogus' => [ 'Not a format' ],
 		];
 	}
 
@@ -551,6 +552,8 @@ class ConvertibleTimestampTest extends TestCase {
 			[ '20190522T120000.....1257' ],
 			[ '20190522T1200001257' ],
 			[ '20190522T120000.....' ],
+			// TS_UNIX_MICRO with excess precision
+			[ '1343761268.123456789' ],
 			[ '2019-05-22 12:00:00....1257-04' ],
 			[ '2019-05-22 12:00:001257-04' ],
 			[ '2019-05-22 12:00:00...-04' ],
