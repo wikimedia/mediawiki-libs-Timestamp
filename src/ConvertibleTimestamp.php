@@ -62,6 +62,7 @@ class ConvertibleTimestamp {
 	private const REGEXES = [
 		// 'TS_DB' => subset of TS_ISO_8601 (with no 'T')
 		'TS_MW' => '/^(?<Y>\d{4})(?<m>\d\d)(?<d>\d\d)(?<H>\d\d)(?<i>\d\d)(?<s>\d\d)$/D',
+		'TS_UNIX' => '/^(?<U>-?\d{1,13})$/D',
 		'TS_ISO_8601' =>
 			'/^(?<Y>\d{4})-(?<m>\d{2})-(?<d>\d{2})[T ]' .
 				'(?<H>\d{2}):(?<i>\d{2}):(?<s>\d{2})(?:[.,](?<u>\d{1,6}))?' .
@@ -69,7 +70,6 @@ class ConvertibleTimestamp {
 		'TS_ISO_8601_BASIC' =>
 			'/^(?<Y>\d{4})(?<m>\d{2})(?<d>\d{2})T(?<H>\d{2})(?<i>\d{2})(?<s>\d{2})(?:[.,](?<u>\d{1,6}))?' .
 				'(?<O>Z|[+\-]\d{2}(?::?\d{2})?)?$/',
-		'TS_UNIX' => '/^(?<U>-?\d{1,13})$/D',
 		'TS_UNIX_MICRO' => '/^(?<U>-?\d{1,13})\.(?<u>\d{1,6})$/D',
 		'TS_ORACLE' =>
 			'/^(?<d>\d{2})-(?<m>\d{2})-(?<Y>\d{4}) (?<H>\d{2}):(?<i>\d{2}):(?<s>\d{2})\.(?<u>\d{6})$/',
