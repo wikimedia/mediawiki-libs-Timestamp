@@ -447,8 +447,8 @@ class ConvertibleTimestamp {
 	 * Calculate the difference between two ConvertibleTimestamp objects.
 	 *
 	 * @param ConvertibleTimestamp $relativeTo Base time to calculate difference from
-	 * @return DateInterval|false The DateInterval object representing the
-	 *   difference between the two dates or false on failure
+	 * @return DateInterval The DateInterval object representing the
+	 *   difference between the two dates
 	 */
 	public function diff( ConvertibleTimestamp $relativeTo ) {
 		return $this->timestamp->diff( $relativeTo->timestamp );
