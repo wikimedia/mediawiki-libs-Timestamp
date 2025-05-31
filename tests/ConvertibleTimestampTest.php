@@ -94,6 +94,18 @@ class ConvertibleTimestampTest extends TestCase {
 		$this->assertEquals( '2022-01-01 10:00:00', $timestamp->getTimestamp( TS_DB ) );
 	}
 
+	public function testAddInvalid() {
+		$this->expectException( TimestampException::class );
+		$timestamp = new ConvertibleTimestamp( '2022-01-01 10:00:00' );
+		$timestamp->add( 'invalid' );
+	}
+
+	public function testSubInvalid() {
+		$this->expectException( TimestampException::class );
+		$timestamp = new ConvertibleTimestamp( '2022-01-01 10:00:00' );
+		$timestamp->sub( 'invalid' );
+	}
+
 	/**
 	 * Parse valid timestamps and output in MW format.
 	 *
