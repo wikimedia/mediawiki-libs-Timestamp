@@ -472,28 +472,6 @@ class ConvertibleTimestampTest extends TestCase {
 		$this->assertGreaterThanOrEqual( $wallClockTime, ConvertibleTimestamp::time() );
 	}
 
-	public function testFakeMicroTime() {
-		$t = 1_000_000;
-		ConvertibleTimestamp::setFakeTime( $t );
-		$this->assertEquals( $t, ConvertibleTimestamp::time() );
-
-		$ret = @ConvertibleTimestamp::microtime();
-		$this->assertGreaterThanOrEqual( $t, $ret );
-		$this->assertLessThanOrEqual( 1, $ret - $t );
-
-		$ret2 = @ConvertibleTimestamp::microtime();
-		$this->assertGreaterThan( $ret, $ret2 );
-		$this->assertLessThan( 1, $ret2 - $ret );
-
-		$t = 1_002_000;
-		ConvertibleTimestamp::setFakeTime( $t );
-		$this->assertEquals( $t, ConvertibleTimestamp::time() );
-
-		$ret = @ConvertibleTimestamp::microtime();
-		$this->assertGreaterThanOrEqual( $t, $ret );
-		$this->assertLessThanOrEqual( 1, $ret - $t );
-	}
-
 	public function testFakeHrtime() {
 		$t = 979516800;
 		ConvertibleTimestamp::setFakeTime( $t );
@@ -601,10 +579,10 @@ class ConvertibleTimestampTest extends TestCase {
 
 	public function testClockTime() {
 		$time = ConvertibleTimestamp::time();
-		$microtime = @ConvertibleTimestamp::microtime();
+		$constructedTime = (int)( new ConvertibleTimestamp )->getTimestamp();
 
-		$this->assertGreaterThanOrEqual( 0, $microtime - $time );
-		$this->assertLessThanOrEqual( 1, $microtime - $time );
+		$this->assertGreaterThanOrEqual( 0, $constructedTime - $time );
+		$this->assertLessThanOrEqual( 1, $constructedTime - $time );
 	}
 
 }

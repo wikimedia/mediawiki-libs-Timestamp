@@ -127,42 +127,6 @@ class ConvertibleTimestamp {
 	}
 
 	/**
-	 * Get the current time as seconds since the epoch, with sub-second precision.
-	 *
-	 * This is equivalent to calling PHP's built-in `microtime(true)`.
-	 * The exact precision depends on the underlying operating system.
-	 *
-	 * You can overwrite microtime for testing purposes by calling setFakeTime().
-	 * In that case, this will re-use the fake time() value in seconds, and add a
-	 * fake microsecond fraction based on an increasing counter.
-	 *
-	 * Repeated calls to microtime() are likely to return unique and increasing values.
-	 * But, there is no guarantee of this, due to clock skew and clock drift correction.
-	 * To measure time spent between two points in the code, use the ::hrtime() instead.
-	 *
-	 * @deprecated To measure relative duration, use ::hrtime(). For timestamps, use ::time().
-	 * @return float Seconds since the epoch
-	 */
-	public static function microtime(): float {
-		trigger_error( __METHOD__ . ' use ::hrtime() instead.', E_USER_DEPRECATED );
-
-		static $fakeSecond = 0;
-		static $fakeOffset = 0.0;
-		if ( static::$fakeTimeCallback ) {
-			$sec = static::time();
-			if ( $sec !== $fakeSecond ) {
-				$fakeSecond = $sec;
-				$fakeOffset = 0.0;
-			} else {
-				$fakeOffset++;
-			}
-			return $fakeSecond + $fakeOffset * 0.000001;
-		} else {
-			return microtime( true );
-		}
-	}
-
-	/**
 	 * Get the value of a monotonic clock in nanoseconds.
 	 *
 	 * This is equivalent to calling PHP's built-in `hrtime(true)`. Repeated calls to
