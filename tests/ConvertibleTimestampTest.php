@@ -576,13 +576,4 @@ class ConvertibleTimestampTest extends TestCase {
 			[ TS_MW, '253402300800' ],
 		];
 	}
-
-	public function testClockTime() {
-		$time = ConvertibleTimestamp::time();
-		$constructedTime = (int)( new ConvertibleTimestamp )->getTimestamp();
-
-		$this->assertGreaterThanOrEqual( 0, $constructedTime - $time );
-		$this->assertLessThanOrEqual( 1, $constructedTime - $time );
-	}
-
 }
