@@ -339,7 +339,7 @@ class ConvertibleTimestamp {
 		try {
 			$ct = new static( $ts );
 			return $ct->getTimestamp( $style );
-		} catch ( TimestampException $e ) {
+		} catch ( TimestampException ) {
 			return false;
 		}
 	}
