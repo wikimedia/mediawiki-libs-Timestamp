@@ -17,8 +17,12 @@
 			"Wikimedia\\Timestamp\\": "src/"
 		}
 	},
+	"provide": {
+		"psr/clock-implementation": "1.0.0"
+	},
 	"require": {
-		"php": ">=8.1"
+		"php": ">=8.1",
+		"psr/clock": "1.0.0"
 	},
 	"require-dev": {
 		"mediawiki/mediawiki-codesniffer": "47.0.0",

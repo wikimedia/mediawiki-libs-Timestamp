@@ -25,6 +25,7 @@ namespace Wikimedia\Timestamp\Test;
 
 use Closure;
 use DateInterval;
+use DateTimeImmutable;
 use InvalidArgumentException;
 use PHPUnit\Framework\TestCase;
 use Wikimedia\Timestamp\ConvertibleTimestamp;
@@ -437,6 +438,12 @@ class ConvertibleTimestampTest extends TestCase {
 
 		$this->assertNotSame( $ts->getTimestamp( TS_MW ), ConvertibleTimestamp::now() );
 		$this->assertNotSame( $fakeTime, ConvertibleTimestamp::time() );
+
+		// test the PSR-20 adapter
+		ConvertibleTimestamp::setFakeTime( '2020020200000' );
+		$clock = ConvertibleTimestamp::getClock();
+		$this->assertInstanceOf( DateTimeImmutable::class, $clock->now() );
+		$this->assertSame( ConvertibleTimestamp::time(), $clock->now()->getTimestamp() );
 	}
 
 	public function testFakeTimeWithStep() {

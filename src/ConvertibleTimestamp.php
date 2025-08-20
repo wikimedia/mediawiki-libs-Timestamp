@@ -30,6 +30,7 @@ use DateTime;
 use DateTimeZone;
 use Exception;
 use InvalidArgumentException;
+use Psr\Clock\ClockInterface;
 use ValueError;
 
 /**
@@ -200,6 +201,13 @@ class ConvertibleTimestamp {
 		$old = static::$fakeTimeCallback;
 		static::$fakeTimeCallback = $fakeTime ?: null;
 		return $old;
+	}
+
+	/**
+	 * Get a PSR-20 clock that respects setFakeTime()
+	 */
+	public static function getClock(): ClockInterface {
+		return new Clock();
 	}
 
 	/**
