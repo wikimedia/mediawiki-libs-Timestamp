@@ -446,6 +446,11 @@ class ConvertibleTimestampTest extends TestCase {
 		$this->assertSame( ConvertibleTimestamp::time(), $clock->now()->getTimestamp() );
 	}
 
+	public function testInvalidFakeTime() {
+		$this->expectException( InvalidArgumentException::class );
+		ConvertibleTimestamp::setFakeTime( true, 1 );
+	}
+
 	public function testFakeTimeWithStep() {
 		$wallClockTime = time();
 
