@@ -33,6 +33,7 @@ use Wikimedia\Timestamp\TimestampException;
 
 /**
  * @covers \Wikimedia\Timestamp\ConvertibleTimestamp
+ * @covers \Wikimedia\Timestamp\Clock
  */
 class ConvertibleTimestampTest extends TestCase {
 
