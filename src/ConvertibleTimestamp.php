@@ -27,6 +27,7 @@ namespace Wikimedia\Timestamp;
 
 use DateInterval;
 use DateTime;
+use DateTimeInterface;
 use DateTimeZone;
 use Exception;
 use InvalidArgumentException;
@@ -222,13 +223,15 @@ class ConvertibleTimestamp {
 	 * Make a new timestamp and set it to the specified time,
 	 * or the current time if unspecified.
 	 *
-	 * @param string|int|float|null|false|DateTime $timestamp Timestamp to set.
+	 * @param string|int|float|null|false|DateTimeInterface $timestamp Timestamp to set.
 	 *   If any falsy value is provided, the timestamp uses the current time instead.
 	 * @throws TimestampException
 	 */
 	public function __construct( $timestamp = false ) {
-		if ( $timestamp instanceof DateTime ) {
-			$this->timestamp = $timestamp;
+		if ( $timestamp instanceof DateTimeInterface ) {
+			$this->timestamp = $timestamp instanceof DateTime
+				? $timestamp
+				: DateTime::createFromInterface( $timestamp );
 		} else {
 			$this->setTimestamp( $timestamp );
 		}

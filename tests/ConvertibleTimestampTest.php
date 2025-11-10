@@ -56,6 +56,22 @@ class ConvertibleTimestampTest extends TestCase {
 		$dt = new \DateTime( "@$input", new \DateTimeZone( 'GMT' ) );
 		$timestamp = new ConvertibleTimestamp( $dt );
 		$this->assertSame( $input, $timestamp->getTimestamp() );
+		// The internal property is aliased.
+		$this->assertSame( $dt, $timestamp->timestamp );
+		$dt->setTimestamp( 1762815097 );
+		$this->assertSame( '1762815097', $timestamp->getTimestamp() );
+	}
+
+	public function testConstructWithDateTimeImmutable() {
+		$input = '1343761268';
+		$dt = new \DateTimeImmutable( "@$input", new \DateTimeZone( 'GMT' ) );
+		$timestamp = new ConvertibleTimestamp( $dt );
+		$this->assertSame( $input, $timestamp->getTimestamp() );
+		// The internal property is not aliased.
+		$this->assertNotSame( $dt, $timestamp->timestamp );
+		$dt->setTimestamp( 1762815097 );
+		$this->assertNotSame( '1762815097', $timestamp->getTimestamp() );
+		$this->assertSame( $input, $timestamp->getTimestamp() );
 	}
 
 	public function testToString() {
