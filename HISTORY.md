@@ -1,5 +1,9 @@
 # Release History
 
+## not yet released
+* Add TimestampFormat enumeration. Users are encouraged to migrate
+  away from the global TS_* constants. (C. Scott Ananian)
+
 ## v5.0.0
 * [BREAKING CHANGE] Drop support for PHP < 8.1 (James D. Forrester)
 * [BREAKING CHANGE] Drop ConvertibleTimestamp::microtime() (James D. Forrester)

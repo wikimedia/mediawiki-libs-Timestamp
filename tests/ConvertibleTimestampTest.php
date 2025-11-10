@@ -30,6 +30,7 @@ use InvalidArgumentException;
 use PHPUnit\Framework\TestCase;
 use Wikimedia\Timestamp\ConvertibleTimestamp;
 use Wikimedia\Timestamp\TimestampException;
+use Wikimedia\Timestamp\TimestampFormat as TS;
 
 /**
  * @covers \Wikimedia\Timestamp\ConvertibleTimestamp
@@ -47,6 +48,7 @@ class ConvertibleTimestampTest extends TestCase {
 		$this->assertIsString( $timestamp->getTimestamp() );
 		$this->assertNotEmpty( $timestamp->getTimestamp() );
 		$this->assertNotFalse( strtotime( $timestamp->getTimestamp( TS_MW ) ) );
+		$this->assertNotFalse( strtotime( $timestamp->getTimestamp( TS::MW ) ) );
 	}
 
 	public function testConstructWithDateTime() {
@@ -88,12 +90,16 @@ class ConvertibleTimestampTest extends TestCase {
 		$timestamp = new ConvertibleTimestamp( '2022-01-01 10:00:00' );
 		$timestamp->add( new DateInterval( 'P1D' ) );
 		$this->assertEquals( '2022-01-02 10:00:00', $timestamp->getTimestamp( TS_DB ) );
+		$this->assertEquals( '2022-01-02 10:00:00', $timestamp->getTimestamp( TS::DB ) );
 		$timestamp->add( 'P1D' );
 		$this->assertEquals( '2022-01-03 10:00:00', $timestamp->getTimestamp( TS_DB ) );
+		$this->assertEquals( '2022-01-03 10:00:00', $timestamp->getTimestamp( TS::DB ) );
 		$timestamp->sub( new DateInterval( 'P1D' ) );
 		$this->assertEquals( '2022-01-02 10:00:00', $timestamp->getTimestamp( TS_DB ) );
+		$this->assertEquals( '2022-01-02 10:00:00', $timestamp->getTimestamp( TS::DB ) );
 		$timestamp->sub( 'P1D' );
 		$this->assertEquals( '2022-01-01 10:00:00', $timestamp->getTimestamp( TS_DB ) );
+		$this->assertEquals( '2022-01-01 10:00:00', $timestamp->getTimestamp( TS::DB ) );
 	}
 
 	public function testAddInvalid() {
@@ -112,6 +118,7 @@ class ConvertibleTimestampTest extends TestCase {
 	 * Parse valid timestamps and output in MW format.
 	 *
 	 * @dataProvider provideValidTimestamps
+	 * @dataProvider provideValidTimestampsIntStyle
 	 */
 	public function testValidParse( $originalFormat, $original, $expectedFormat, $expected ) {
 		$timestamp = new ConvertibleTimestamp( $original );
@@ -213,7 +220,7 @@ class ConvertibleTimestampTest extends TestCase {
 	/**
 	 * @dataProvider provideParseOnly
 	 */
-	public function testValidParseOnly( $original, $expected, $format = TS_UNIX_MICRO ) {
+	public function testValidParseOnly( $original, $expected, $format = TS::UNIX_MICRO ) {
 		// Parsing of the 2-digit year in RFC 850 format is tested more extensively below.
 		// For this test, just make sure it doesn't break in 2062.
 		ConvertibleTimestamp::setFakeTime( static function () {
@@ -288,7 +295,7 @@ class ConvertibleTimestampTest extends TestCase {
 		$timestamp = new ConvertibleTimestamp( 0 );
 		$this->assertEqualsWithDelta(
 			$now,
-			$timestamp->getTimestamp( TS_UNIX ),
+			$timestamp->getTimestamp( TS::UNIX ),
 			10.0,
 			'now'
 		);
@@ -297,7 +304,7 @@ class ConvertibleTimestampTest extends TestCase {
 	public function testNow() {
 		$this->assertEqualsWithDelta(
 			time(),
-			ConvertibleTimestamp::now( TS_UNIX ),
+			ConvertibleTimestamp::now( TS::UNIX ),
 			10.0,
 			'now'
 		);
@@ -315,6 +322,7 @@ class ConvertibleTimestampTest extends TestCase {
 	 * Output valid timestamps in different formats.
 	 *
 	 * @dataProvider provideValidTimestamps
+	 * @dataProvider provideValidTimestampsIntStyle
 	 */
 	public function testValidFormats( $expectedFormat, $expected, $originalFormat, $original ) {
 		$timestamp = new ConvertibleTimestamp( $original );
@@ -323,6 +331,7 @@ class ConvertibleTimestampTest extends TestCase {
 
 	/**
 	 * @dataProvider provideValidTimestamps
+	 * @dataProvider provideValidTimestampsIntStyle
 	 */
 	public function testConvert( $expectedFormat, $expected, $originalFormat, $original ) {
 		$this->assertSame( $expected, ConvertibleTimestamp::convert( $expectedFormat, $original ) );
@@ -332,7 +341,7 @@ class ConvertibleTimestampTest extends TestCase {
 	 * @dataProvider provideInvalidTimestamps
 	 */
 	public function testConvertInvalid( $input ) {
-		$this->assertSame( false, ConvertibleTimestamp::convert( TS_UNIX, $input ) );
+		$this->assertSame( false, ConvertibleTimestamp::convert( TS::UNIX, $input ) );
 	}
 
 	/**
@@ -396,7 +405,7 @@ class ConvertibleTimestampTest extends TestCase {
 
 	public function testFakeTime() {
 		// fake clock ticks up
-		$fakeTime = (int)ConvertibleTimestamp::convert( TS_UNIX, '20010101000000' );
+		$fakeTime = (int)ConvertibleTimestamp::convert( TS::UNIX, '20010101000000' );
 		$fakeClock = $fakeTime;
 		ConvertibleTimestamp::setFakeTime( static function () use ( &$fakeClock ) {
 			return $fakeClock++;
@@ -404,17 +413,19 @@ class ConvertibleTimestampTest extends TestCase {
 		$this->assertSame( $fakeTime, ConvertibleTimestamp::time() );
 		$this->assertSame( '20010101000001', ConvertibleTimestamp::now() );
 		$this->assertSame( '20010101000002', ConvertibleTimestamp::convert( TS_MW, false ) );
-		$this->assertSame( '20010101000003', ConvertibleTimestamp::now() );
-		$this->assertSame( $fakeTime + 4, ConvertibleTimestamp::time() );
+		$this->assertSame( '20010101000003', ConvertibleTimestamp::convert( TS::MW, false ) );
+		$this->assertSame( '20010101000004', ConvertibleTimestamp::now() );
+		$this->assertSame( $fakeTime + 5, ConvertibleTimestamp::time() );
 
 		// fake time stays put
 		$old = ConvertibleTimestamp::setFakeTime( '20200202112233' );
 		$this->assertTrue( is_callable( $old ) );
 
-		$fakeTime = (int)ConvertibleTimestamp::convert( TS_UNIX, '20200202112233' );
+		$fakeTime = (int)ConvertibleTimestamp::convert( TS::UNIX, '20200202112233' );
 		$this->assertSame( $fakeTime, ConvertibleTimestamp::time() );
 		$this->assertSame( '20200202112233', ConvertibleTimestamp::now() );
 		$this->assertSame( '20200202112233', ConvertibleTimestamp::convert( TS_MW, false ) );
+		$this->assertSame( '20200202112233', ConvertibleTimestamp::convert( TS::MW, false ) );
 		$this->assertSame( '20200202112233', ConvertibleTimestamp::now() );
 
 		$fakeTime = new ConvertibleTimestamp( '20200202030201' );
@@ -423,7 +434,7 @@ class ConvertibleTimestampTest extends TestCase {
 
 		// test starting at date string
 		$ts = '2020-01-01T03:04:05Z';
-		$timestampUnix = (int)ConvertibleTimestamp::convert( TS_UNIX, $ts );
+		$timestampUnix = (int)ConvertibleTimestamp::convert( TS::UNIX, $ts );
 		ConvertibleTimestamp::setFakeTime( $ts );
 		$this->assertSame( $timestampUnix, ConvertibleTimestamp::time() );
 
@@ -436,8 +447,10 @@ class ConvertibleTimestampTest extends TestCase {
 		$old = ConvertibleTimestamp::setFakeTime( false );
 		$this->assertInstanceOf( Closure::class, $old );
 		$this->assertSame( $ts->getTimestamp( TS_MW ), ConvertibleTimestamp::convert( TS_MW, $old() ) );
+		$this->assertSame( $ts->getTimestamp( TS::MW ), ConvertibleTimestamp::convert( TS::MW, $old() ) );
 
 		$this->assertNotSame( $ts->getTimestamp( TS_MW ), ConvertibleTimestamp::now() );
+		$this->assertNotSame( $ts->getTimestamp( TS::MW ), ConvertibleTimestamp::now() );
 		$this->assertNotSame( $fakeTime, ConvertibleTimestamp::time() );
 
 		// test the PSR-20 adapter
@@ -515,6 +528,34 @@ class ConvertibleTimestampTest extends TestCase {
 	 * [ type, timestamp_of_type, timestamp_in_MW ]
 	 */
 	public static function provideValidTimestamps() {
+		// These test cases use the TimestampFormat enumeration
+		return [
+			// Formats supported in both directions
+			[ TS::UNIX, '1343761268', TS::MW, '20120731190108' ],
+			[ TS::UNIX_MICRO, '1343761268.000000', TS::MW, '20120731190108' ],
+			[ TS::UNIX_MICRO, '1343761268.123456', TS::ORACLE, '31-07-2012 19:01:08.123456' ],
+			[ TS::MW, '20120731190108', TS::MW, '20120731190108' ],
+			[ TS::DB, '2012-07-31 19:01:08', TS::MW, '20120731190108' ],
+			[ TS::ISO_8601, '2012-07-31T19:01:08Z', TS::MW, '20120731190108' ],
+			[ TS::ISO_8601_BASIC, '20120731T190108Z', TS::MW, '20120731190108' ],
+			[ TS::EXIF, '2012:07:31 19:01:08', TS::MW, '20120731190108' ],
+			[ TS::RFC2822, 'Tue, 31 Jul 2012 19:01:08 GMT', TS::MW, '20120731190108' ],
+			[ TS::ORACLE, '31-07-2012 19:01:08.000000', TS::MW, '20120731190108' ],
+			[ TS::ORACLE, '31-07-2012 19:01:08.123456', TS::UNIX_MICRO, '1343761268.123456' ],
+			[ TS::POSTGRES, '2012-07-31 19:01:08+00', TS::MW, '20120731190108' ],
+			// Some extremes and weird values
+			[ TS::ISO_8601, '9999-12-31T23:59:59Z', TS::MW, '99991231235959' ],
+			[ TS::UNIX, '-62135596801', TS::MW, '00001231235959' ],
+			[ TS::UNIX_MICRO, '-1.100000', TS::ORACLE, '31-12-1969 23:59:58.900000' ],
+		];
+	}
+
+	/**
+	 * Returns a list of valid timestamps in the format:
+	 * [ type, timestamp_of_type, timestamp_in_MW ]
+	 */
+	public static function provideValidTimestampsIntStyle() {
+		// These timestamps use integer style parameters
 		return [
 			// Formats supported in both directions
 			[ TS_UNIX, '1343761268', TS_MW, '20120731190108' ],
@@ -585,8 +626,10 @@ class ConvertibleTimestampTest extends TestCase {
 		return [
 			// -0001-12-31T23:59:59Z
 			[ TS_MW, '-62167219201' ],
+			[ TS::MW, '-62167219201' ],
 			// 10000-01-01T00:00:00Z
 			[ TS_MW, '253402300800' ],
+			[ TS::MW, '253402300800' ],
 		];
 	}
 }
