@@ -72,6 +72,12 @@ Running tests
     composer install --prefer-dist
     composer test
 
+Releasing a new version
+-----------------------
+
+This package uses `wikimedia/update-history` and its conventions.
+
+See https://www.mediawiki.org/wiki/UpdateHistory for details.
 
 ---
 [Latest Stable Version]: https://poser.pugx.org/wikimedia/timestamp/v/stable.svg
