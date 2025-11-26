@@ -1,5 +1,7 @@
 # Release History
 
+## Timestamp x.x.x (not yet released)
+
 ## Timestamp 5.1.0 (2025-11-26)
 * Add TimestampFormat enumeration. Users are encouraged to migrate
   away from the global TS_* constants. (C. Scott Ananian)
