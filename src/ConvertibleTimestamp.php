@@ -243,7 +243,7 @@ class ConvertibleTimestamp {
 			$format = 'U';
 		} else {
 			foreach ( self::REGEXES as $name => $regex ) {
-				if ( !preg_match( $regex, $ts, $m ) ) {
+				if ( !preg_match( $regex, (string)$ts, $m ) ) {
 					continue;
 				}
 
