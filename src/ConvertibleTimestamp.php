@@ -314,8 +314,10 @@ class ConvertibleTimestamp {
 
 		try {
 			$final = DateTime::createFromFormat( "!$format", $strtime, new DateTimeZone( 'UTC' ) );
+			// @codeCoverageIgnoreStart
 		} catch ( ValueError $e ) {
 			throw new TimestampException( __METHOD__ . ': Invalid timestamp format.', $e->getCode(), $e );
+			// @codeCoverageIgnoreEnd
 		}
 
 		if ( $final === false ) {
