@@ -57,7 +57,7 @@ class ConvertibleTimestampTest extends TestCase {
 		$this->assertSame( $input, $timestamp->getTimestamp() );
 		// The internal property is not aliased.
 		$this->assertNotSame( $dt, $timestamp->timestamp );
-		$dt->setTimestamp( 1762815097 );
+		$discard = $dt->setTimestamp( 1762815097 );
 		$this->assertNotSame( '1762815097', $timestamp->getTimestamp() );
 		$this->assertSame( $input, $timestamp->getTimestamp() );
 	}

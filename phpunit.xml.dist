@@ -10,6 +10,7 @@
 	failOnDeprecation="true"
 	failOnPhpunitDeprecation="true"
 	failOnNotice="true"
+	failOnWarning="true"
 	requireCoverageMetadata="true"
 	beStrictAboutTestsThatDoNotTestAnything="true"
 	beStrictAboutOutputDuringTests="true"
